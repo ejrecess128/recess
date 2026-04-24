@@ -702,71 +702,72 @@ input[type=range].slider::-webkit-slider-thumb {
   min-height: calc(100vh - 60px - 54px);
 }
 
-/* ── Cart sidebar (right, sticky) ── */
-.cp-cart {
+/* ── Summary sidebar (right, sticky) ── */
+.cp-summary {
   background: var(--surface);
   border-left: 1px solid var(--border);
   padding: 16px;
   position: sticky;
-  top: 114px; /* header 60 + cp-header ~54 */
+  top: 114px;
   height: calc(100vh - 114px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
-.cp-cart-header {
+.cp-summary-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 14px;
 }
-.cp-cart-title { font-size: 15px; font-weight: 700; color: var(--text); }
-.cp-cart-count {
+.cp-summary-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.cp-summary-count {
   font-size: 11px; font-weight: 700;
   background: rgba(0,61,165,0.08); color: var(--primary);
   padding: 2px 8px; border-radius: var(--radius-pill);
 }
 
-.cp-cart-empty { padding: 20px 0; text-align: center; }
-.cp-cart-empty p { font-size: 13px; color: var(--text-3); }
-.cp-cart-hint { font-size: 12px; margin-top: 4px; }
+.cp-summary-empty { padding: 20px 0; text-align: center; }
+.cp-summary-empty p { font-size: 13px; color: var(--text-3); }
+.cp-summary-hint { font-size: 12px; margin-top: 4px; }
 
-.cp-cart-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.cp-cart-item {
+.cp-summary-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.cp-summary-item {
   display: flex; justify-content: space-between; align-items: flex-start;
   padding: 10px; background: var(--neutral-10);
   border-radius: var(--radius-md); gap: 8px; border: 1px solid var(--border);
 }
-.cp-cart-item-info { flex: 1; min-width: 0; }
-.cp-cart-item-name { font-size: 13px; font-weight: 700; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cp-cart-item-detail { font-size: 11px; color: var(--text-3); display: block; }
-.cp-cart-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-.cp-cart-item-price { font-size: 12px; font-weight: 700; color: var(--primary); }
-.cp-cart-item-remove {
-  background: none; border: none; font-size: 16px; color: var(--text-3);
-  cursor: pointer; line-height: 1; padding: 0;
+.cp-summary-item-info { flex: 1; min-width: 0; }
+.cp-summary-item-name { font-size: 13px; font-weight: 700; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-summary-item-detail { font-size: 11px; color: var(--text-3); display: block; }
+.cp-summary-item-badges { display: flex; gap: 4px; margin-top: 4px; }
+.cp-summary-badge {
+  font-size: 10px; font-weight: 600; padding: 1px 6px;
+  border-radius: var(--radius-pill);
 }
-.cp-cart-item-remove:hover { color: var(--secondary); }
+.cp-summary-badge--cart { background: var(--teal-tint); color: var(--teal); }
+.cp-summary-badge--compare { background: rgba(0,61,165,0.08); color: var(--primary); }
+.cp-summary-item-price { font-size: 12px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
 
-.cp-cart-totals {
+.cp-summary-totals {
   border-top: 1px solid var(--border); padding-top: 12px; margin-bottom: 12px;
 }
-.cp-cart-total-row {
+.cp-summary-total-row {
   display: flex; justify-content: space-between;
   font-size: 13px; font-weight: 600; margin-bottom: 3px;
 }
-.cp-cart-total-amount { font-size: 22px; font-weight: 700; color: var(--primary); }
-.cp-cart-total-sub { font-size: 12px; color: var(--text-3); font-weight: 400; }
+.cp-summary-total-amount { font-size: 22px; font-weight: 700; color: var(--primary); }
+.cp-summary-total-sub { font-size: 12px; color: var(--text-3); font-weight: 400; }
 
-.cp-cart-checkout {
+.cp-summary-cta {
   width: 100%; padding: 12px; background: var(--primary); color: white;
   border: none; border-radius: var(--radius-pill);
   font: 700 13px/1 var(--font-primary); cursor: pointer;
   transition: background 0.15s;
 }
-.cp-cart-checkout:hover { background: var(--primary-hover); }
-.cp-cart-checkout:active { transform: translateY(1px); }
+.cp-summary-cta:hover { background: var(--primary-hover); }
+.cp-summary-cta:active { transform: translateY(1px); }
 
-.cp-cart-tip {
+.cp-summary-tip {
   display: flex; gap: 6px; margin-top: auto; padding-top: 14px;
   font-size: 11px; color: var(--text-3); line-height: 1.4;
 }
@@ -807,6 +808,83 @@ input[type=range].slider::-webkit-slider-thumb {
 .calv-slot-check { font-size: 13px; font-weight: 700; margin-left: 3px; }
 .calv-week-flag { font-size: 10px; color: var(--primary); font-weight: 700; white-space: nowrap; margin-top: 3px; }
 .calv-week-cost { font-size: 14px; font-weight: 700; white-space: nowrap; margin-top: 3px; }
+.calv-week-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.calv-week-clickable { cursor: pointer; }
+.calv-week-clickable:hover { border-color: var(--primary); }
+.calv-drill-hint { font-size: 12px; color: var(--neutral-30); font-weight: 600; }
+.calv-week-clickable:hover .calv-drill-hint { color: var(--primary); }
+
+/* Calendar view header / breadcrumbs */
+.calv-view-label {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.calv-view-icon { font-size: 16px; }
+.calv-view-label > span { font-size: 14px; font-weight: 700; color: var(--text); }
+.calv-view-hint { font-size: 12px; font-weight: 400; color: var(--text-3); margin-left: auto; }
+.calv-view-current { font-size: 14px; font-weight: 700; color: var(--text); }
+.calv-breadcrumb {
+  background: none; border: none; font-size: 13px; color: var(--primary);
+  cursor: pointer; font-family: var(--font-primary); font-weight: 600; padding: 0;
+  transition: color 0.15s;
+}
+.calv-breadcrumb:hover { color: var(--primary-hover); }
+.calv-sidebar-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 8px; }
+
+/* Day view */
+.calv-day-assigned {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--radius-lg);
+  border: 2px solid var(--border); background: var(--surface);
+  font-size: 14px; color: var(--text);
+}
+.calv-day-assigned strong { font-weight: 700; }
+.calv-day-assigned-meta { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+.calv-day-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.calv-day-card {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 14px; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--surface);
+  cursor: pointer; text-align: left; font-family: var(--font-primary);
+  transition: all 0.15s; position: relative;
+  min-height: 120px;
+}
+.calv-day-card:hover { border-color: var(--primary); box-shadow: var(--shadow-xs); }
+.calv-day-card .calv-drill-hint { position: absolute; top: 12px; right: 12px; }
+.calv-day-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.calv-day-date { font-size: 12px; color: var(--text-2); }
+.calv-day-camp {
+  margin-top: auto; padding: 8px 10px; border-radius: var(--radius-md);
+  font-size: 12px; font-weight: 700;
+}
+.calv-day-camp-hours { display: block; font-size: 11px; font-weight: 500; margin-top: 2px; }
+.calv-day-avail { font-size: 11px; color: var(--text-3); margin-top: auto; }
+.calv-day-assign-section { padding-top: 8px; }
+
+/* Hour view */
+.calv-hour-grid { display: flex; flex-direction: column; gap: 0; }
+.calv-hour-row {
+  display: grid; grid-template-columns: 80px 1fr; gap: 0;
+  min-height: 48px; border-bottom: 1px solid var(--border);
+}
+.calv-hour-row:last-child { border-bottom: none; }
+.calv-hour-label {
+  font-size: 12px; font-weight: 600; color: var(--text-3);
+  padding: 12px 14px; border-right: 1px solid var(--border);
+  display: flex; align-items: flex-start;
+}
+.calv-hour-block {
+  padding: 10px 14px; display: flex; align-items: center;
+  border-left: 3px solid transparent; transition: all 0.15s;
+}
+.calv-hour-active .calv-hour-block { border-left-color: currentColor; }
+.calv-hour-camp { font-size: 13px; font-weight: 600; }
+.calv-hour-camp span { display: block; }
+.calv-hour-detail { font-size: 11px; font-weight: 400; margin-top: 2px; }
+.calv-hour-free { font-size: 12px; color: var(--neutral-30); }
 
 /* ══════════════════════════════════
    RESPONSIVE
@@ -822,10 +900,11 @@ input[type=range].slider::-webkit-slider-thumb {
   .filter-section { padding: 10px 0; }
   .header-tagline { display: none; }
   .cp-layout { grid-template-columns: 1fr; }
-  .cp-cart {
+  .cp-summary {
     position: static; height: auto;
     border-left: none; border-top: 1px solid var(--border);
   }
+  .calv-day-grid { grid-template-columns: repeat(3, 1fr); }
   .cp-header { padding: 12px 16px; }
   .cv-container { padding: 16px; }
   .calv-content { padding: 16px; }
@@ -859,4 +938,6 @@ input[type=range].slider::-webkit-slider-thumb {
 
   .calv-week-row { grid-template-columns: 1fr; gap: 6px; }
   .calv-week-slots { flex-direction: column; }
+  .calv-day-grid { grid-template-columns: repeat(2, 1fr); }
+  .calv-hour-row { grid-template-columns: 60px 1fr; }
 }

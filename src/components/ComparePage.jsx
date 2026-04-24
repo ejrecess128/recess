@@ -15,30 +15,62 @@ const WEEK_MONTHS = [
   { label: "August", ids: ["w9","w10"] },
 ];
 
+// Generate days for a week given its date string like "Jun 9–13"
+function getWeekDays(dateStr) {
+  const match = dateStr.match(/(\w+)\s+(\d+)–(\d+)/);
+  if (!match) {
+    // Handle "Jun 30–Jul 4" style
+    const crossMatch = dateStr.match(/(\w+)\s+(\d+)–(\w+)\s+(\d+)/);
+    if (!crossMatch) return [];
+    const [, m1, d1, m2, d2] = crossMatch;
+    const days = [];
+    for (let i = 0; i < 5; i++) {
+      if (i <= (30 - Number(d1))) {
+        days.push({ label: ["Mon","Tue","Wed","Thu","Fri"][i], date: `${m1} ${Number(d1) + i}` });
+      } else {
+        days.push({ label: ["Mon","Tue","Wed","Thu","Fri"][i], date: `${m2} ${Number(d2) - (4 - i)}` });
+      }
+    }
+    return days;
+  }
+  const [, month, startDay] = match;
+  return ["Mon","Tue","Wed","Thu","Fri"].map((d, i) => ({
+    label: d,
+    date: `${month} ${Number(startDay) + i}`,
+  }));
+}
+
+// Parse hours string like "9 AM – 4 PM" into hour blocks
+function getHourBlocks(hoursStr) {
+  const match = hoursStr.match(/(\d+)(?::(\d+))?\s*(AM|PM)\s*–\s*(\d+)(?::(\d+))?\s*(AM|PM)/i);
+  if (!match) return [];
+  let startH = Number(match[1]);
+  if (match[3].toUpperCase() === "PM" && startH !== 12) startH += 12;
+  if (match[3].toUpperCase() === "AM" && startH === 12) startH = 0;
+  let endH = Number(match[4]);
+  if (match[6].toUpperCase() === "PM" && endH !== 12) endH += 12;
+  if (match[6].toUpperCase() === "AM" && endH === 12) endH = 0;
+  const blocks = [];
+  for (let h = startH; h < endH; h++) {
+    const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    const ampm = h >= 12 ? "PM" : "AM";
+    blocks.push({ hour: h, label: `${hour12} ${ampm}` });
+  }
+  return blocks;
+}
+
 const CRITERIA = [
-  { key: "price",    label: "Price / wk",    render: (c) => `$${c.price}`,
-    check: (c, f) => c.price <= f.budget },
-  { key: "age",      label: "Age range",     render: (c) => `${c.ageMin}–${c.ageMax}`,
-    check: (c, f) => f.childAge >= c.ageMin && f.childAge <= c.ageMax },
-  { key: "type",     label: "Day type",      render: (c) => c.type,
-    check: (c, f) => f.dayType === "any" || c.type.toLowerCase().includes(f.dayType) },
-  { key: "weeks",    label: "Your weeks",
-    render: (c, f) => {
-      if (f.weeks.length === 0) return "Any";
-      const n = f.weeks.filter(w => c.weeks.includes(w)).length;
-      return `${n}/${f.weeks.length} weeks`;
-    },
+  { key: "price", label: "Price / wk", render: (c) => `$${c.price}`, check: (c, f) => c.price <= f.budget },
+  { key: "age", label: "Age range", render: (c) => `${c.ageMin}–${c.ageMax}`, check: (c, f) => f.childAge >= c.ageMin && f.childAge <= c.ageMax },
+  { key: "type", label: "Day type", render: (c) => c.type, check: (c, f) => f.dayType === "any" || c.type.toLowerCase().includes(f.dayType) },
+  { key: "weeks", label: "Your weeks",
+    render: (c, f) => { if (f.weeks.length === 0) return "Any"; const n = f.weeks.filter(w => c.weeks.includes(w)).length; return `${n}/${f.weeks.length} weeks`; },
     check: (c, f) => f.weeks.length === 0 || f.weeks.some(w => c.weeks.includes(w)) },
-  { key: "avail",    label: "Availability",  render: (c) => `${c.spotsRemaining} spots`,
-    check: (c) => c.spotsRemaining > 0 },
-  { key: "rating",   label: "Rating",        render: (c) => `★ ${c.rating}`,
-    check: (c) => c.rating >= 4.7 },
-  { key: "distance", label: "Distance",      render: (c) => `${c.distance} mi`,
-    check: (c) => c.distance <= 4 },
-  { key: "location", label: "Location",      render: (c) => c.location,
-    check: () => true },
-  { key: "hours",    label: "Hours",         render: (c) => c.hours,
-    check: () => true },
+  { key: "avail", label: "Availability", render: (c) => `${c.spotsRemaining} spots`, check: (c) => c.spotsRemaining > 0 },
+  { key: "rating", label: "Rating", render: (c) => `★ ${c.rating}`, check: (c) => c.rating >= 4.7 },
+  { key: "distance", label: "Distance", render: (c) => `${c.distance} mi`, check: (c) => c.distance <= 4 },
+  { key: "location", label: "Location", render: (c) => c.location, check: () => true },
+  { key: "hours", label: "Hours", render: (c) => c.hours, check: () => true },
 ];
 
 export default function ComparePage({ planIds, filters, onBack, onTogglePlan, cartIds, toggleCart }) {
@@ -48,7 +80,11 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
 
   const camps = MOCK_CAMPS.filter(c => planIds.includes(c.id));
   const cartCamps = MOCK_CAMPS.filter(c => cartIds.includes(c.id));
-  const cartTotal = cartCamps.reduce((sum, c) => sum + c.price, 0);
+
+  // Combine cart + compared camps for summary (deduplicated)
+  const allSummaryIds = [...new Set([...cartIds, ...planIds])];
+  const summaryCamps = MOCK_CAMPS.filter(c => allSummaryIds.includes(c.id));
+  const summaryTotal = summaryCamps.reduce((sum, c) => sum + c.price, 0);
 
   function assignWeek(weekId, campId) {
     setCalAssignments(prev => {
@@ -60,17 +96,13 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
   }
 
   function handleExport(type) {
-    const labels = {
-      pdf: "Generating PDF…", link: "Link copied to clipboard!",
-      email: "Plan emailed to you!", gcal: "Opening Google Calendar…",
-    };
+    const labels = { pdf: "Generating PDF…", link: "Link copied to clipboard!", gcal: "Opening Google Calendar…" };
     setExportMsg(labels[type]);
     setTimeout(() => setExportMsg(null), 3000);
   }
 
   return (
     <div className="compare-page">
-      {/* Top bar */}
       <div className="cp-header">
         <div className="cp-header-left">
           <button className="cp-back" onClick={onBack}>← Back to camps</button>
@@ -91,7 +123,6 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
 
       {exportMsg && <div className="cp-toast">{exportMsg}</div>}
 
-      {/* Main layout: content left, cart right */}
       <div className="cp-layout">
         <div className="cp-content">
           {camps.length === 0 ? (
@@ -106,63 +137,62 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
           ) : view === "compare" ? (
             <CompareView camps={camps} filters={filters} onTogglePlan={onTogglePlan} planIds={planIds} />
           ) : (
-            <CalendarView
-              camps={camps}
-              filters={filters}
-              calAssignments={calAssignments}
-              onAssign={assignWeek}
-              onExport={handleExport}
-            />
+            <CalendarView camps={camps} filters={filters} calAssignments={calAssignments} onAssign={assignWeek} />
           )}
         </div>
 
-        {/* Persistent cart sidebar */}
-        <aside className="cp-cart">
-          <div className="cp-cart-header">
-            <span className="cp-cart-title">Your cart</span>
-            <span className="cp-cart-count">{cartCamps.length}</span>
+        {/* Persistent summary sidebar */}
+        <aside className="cp-summary">
+          <div className="cp-summary-header">
+            <span className="cp-summary-title">Summary</span>
+            <span className="cp-summary-count">{summaryCamps.length} camp{summaryCamps.length !== 1 ? "s" : ""}</span>
           </div>
 
-          {cartCamps.length === 0 ? (
-            <div className="cp-cart-empty">
-              <p>No camps in cart yet.</p>
-              <p className="cp-cart-hint">Add camps from the feed to see your total here.</p>
+          {summaryCamps.length === 0 ? (
+            <div className="cp-summary-empty">
+              <p>No camps selected yet.</p>
+              <p className="cp-summary-hint">Add camps to your cart or comparison to see your total here.</p>
             </div>
           ) : (
             <>
-              <div className="cp-cart-items">
-                {cartCamps.map(camp => (
-                  <div key={camp.id} className="cp-cart-item">
-                    <div className="cp-cart-item-info">
-                      <span className="cp-cart-item-name">{camp.name}</span>
-                      <span className="cp-cart-item-detail">{camp.program}</span>
+              <div className="cp-summary-items">
+                {summaryCamps.map(camp => {
+                  const inCart = cartIds.includes(camp.id);
+                  const inCompare = planIds.includes(camp.id);
+                  return (
+                    <div key={camp.id} className="cp-summary-item">
+                      <div className="cp-summary-item-info">
+                        <span className="cp-summary-item-name">{camp.name}</span>
+                        <span className="cp-summary-item-detail">{camp.program}</span>
+                        <div className="cp-summary-item-badges">
+                          {inCart && <span className="cp-summary-badge cp-summary-badge--cart">In cart</span>}
+                          {inCompare && <span className="cp-summary-badge cp-summary-badge--compare">Comparing</span>}
+                        </div>
+                      </div>
+                      <span className="cp-summary-item-price">${camp.price}/wk</span>
                     </div>
-                    <div className="cp-cart-item-right">
-                      <span className="cp-cart-item-price">${camp.price}/wk</span>
-                      <button className="cp-cart-item-remove" onClick={() => toggleCart(camp.id)} title="Remove">×</button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
-              <div className="cp-cart-totals">
-                <div className="cp-cart-total-row">
+              <div className="cp-summary-totals">
+                <div className="cp-summary-total-row">
                   <span>Weekly total</span>
-                  <span className="cp-cart-total-amount">${cartTotal}</span>
+                  <span className="cp-summary-total-amount">${summaryTotal}</span>
                 </div>
-                <div className="cp-cart-total-row cp-cart-total-sub">
+                <div className="cp-summary-total-row cp-summary-total-sub">
                   <span>{filters.weeks.length || 1} week{(filters.weeks.length || 1) !== 1 ? "s" : ""} planned</span>
-                  <span>${cartTotal * (filters.weeks.length || 1)}</span>
+                  <span>${summaryTotal * (filters.weeks.length || 1)} est.</span>
                 </div>
               </div>
 
-              <button className="cp-cart-checkout">Proceed to booking</button>
+              <button className="cp-summary-cta">Proceed to booking</button>
             </>
           )}
 
-          <div className="cp-cart-tip">
+          <div className="cp-summary-tip">
             <span>💡</span>
-            <span>You can always change this plan later.</span>
+            <span>Both carted and compared camps are included in your total.</span>
           </div>
         </aside>
       </div>
@@ -217,70 +247,233 @@ function CompareView({ camps, filters, onTogglePlan, planIds }) {
 }
 
 /* ═══════════════════════════════════════════
-   CALENDAR VIEW
+   CALENDAR VIEW — Week → Day → Hour drill-down
 ═══════════════════════════════════════════ */
 const CAMP_COLORS = [
   { bg: "#E6F4F5", border: "#068D9D", text: "#056B76" },
   { bg: "#EFF6FF", border: "#003DA5", text: "#002D7A" },
   { bg: "#FFF0EB", border: "#E05A2B", text: "#B8421A" },
   { bg: "#F5F3FF", border: "#7C3AED", text: "#5B21B6" },
+  { bg: "#FFF8E6", border: "#D97706", text: "#92400E" },
 ];
 
-function CalendarView({ camps, filters, calAssignments, onAssign, onExport }) {
+function CalendarView({ camps, filters, calAssignments, onAssign }) {
+  const [calView, setCalView] = useState("week"); // "week" | "day" | "hour"
+  const [selectedWeek, setSelectedWeek] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+
   const weekMap = Object.fromEntries(SUMMER_WEEKS.map(w => [w.id, w]));
   const campColorMap = Object.fromEntries(camps.map((c, i) => [c.id, CAMP_COLORS[i % CAMP_COLORS.length]]));
 
-  return (
-    <div className="calv-content">
-      {WEEK_MONTHS.map(month => (
-        <div key={month.label} className="calv-month">
-          <div className="calv-month-label">{month.label}</div>
-          <div className="calv-weeks">
-            {month.ids.map(wid => {
-              const wk = weekMap[wid];
-              const assignedId = calAssignments[wid];
-              const assignedCamp = assignedId ? MOCK_CAMPS.find(c => c.id === assignedId) : null;
-              const availableCamps = camps.filter(c => c.weeks.includes(wid));
-              const isUserWeek = filters.weeks.includes(wid);
-              const col = assignedCamp ? campColorMap[assignedCamp.id] : null;
+  function drillToDay(wid) {
+    setSelectedWeek(wid);
+    setCalView("day");
+    setSelectedDay(null);
+  }
 
-              return (
-                <div key={wid} className={`calv-week-row ${isUserWeek ? "calv-week-selected" : ""}`}>
-                  <div className="calv-week-label">
-                    <div className="calv-week-id">{wk.label}</div>
-                    <div className="calv-week-dates">{wk.dates}</div>
-                  </div>
-                  <div className="calv-week-slots">
-                    {availableCamps.length === 0 ? (
-                      <div className="calv-slot calv-slot-empty">No camps available</div>
-                    ) : availableCamps.map(camp => {
-                      const isAssigned = calAssignments[wid] === camp.id;
-                      const col2 = campColorMap[camp.id];
-                      return (
-                        <button
-                          key={camp.id}
-                          className={`calv-slot ${isAssigned ? "calv-slot-active" : ""}`}
-                          style={isAssigned ? { background: col2.bg, borderColor: col2.border, color: col2.text } : {}}
-                          onClick={() => onAssign(wid, camp.id)}
-                        >
-                          <span className="calv-slot-emoji">{CAT_EMOJI[camp.category]}</span>
-                          <div className="calv-slot-info">
-                            <div className="calv-slot-name">{camp.name}</div>
-                            <div className="calv-slot-price">${camp.price}/wk</div>
-                          </div>
-                          {isAssigned && <span className="calv-slot-check">✓</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {isUserWeek && !assignedCamp && <div className="calv-week-flag">your week</div>}
-                  {assignedCamp && <div className="calv-week-cost" style={{ color: col?.text }}>${assignedCamp.price}</div>}
-                </div>
-              );
-            })}
-          </div>
+  function drillToHour(dayInfo) {
+    setSelectedDay(dayInfo);
+    setCalView("hour");
+  }
+
+  function goBackToWeek() {
+    setCalView("week");
+    setSelectedWeek(null);
+    setSelectedDay(null);
+  }
+
+  function goBackToDay() {
+    setCalView("day");
+    setSelectedDay(null);
+  }
+
+  // ── WEEK VIEW ──
+  if (calView === "week") {
+    return (
+      <div className="calv-content">
+        <div className="calv-view-label">
+          <span className="calv-view-icon">📅</span>
+          <span>Week view</span>
+          <span className="calv-view-hint">Click a week to see daily schedule</span>
         </div>
-      ))}
-    </div>
-  );
+        {WEEK_MONTHS.map(month => (
+          <div key={month.label} className="calv-month">
+            <div className="calv-month-label">{month.label}</div>
+            <div className="calv-weeks">
+              {month.ids.map(wid => {
+                const wk = weekMap[wid];
+                const assignedId = calAssignments[wid];
+                const assignedCamp = assignedId ? MOCK_CAMPS.find(c => c.id === assignedId) : null;
+                const availableCamps = camps.filter(c => c.weeks.includes(wid));
+                const isUserWeek = filters.weeks.includes(wid);
+                const col = assignedCamp ? campColorMap[assignedCamp.id] : null;
+
+                return (
+                  <div
+                    key={wid}
+                    className={`calv-week-row calv-week-clickable ${isUserWeek ? "calv-week-selected" : ""}`}
+                    onClick={() => drillToDay(wid)}
+                  >
+                    <div className="calv-week-label">
+                      <div className="calv-week-id">{wk.label}</div>
+                      <div className="calv-week-dates">{wk.dates}</div>
+                    </div>
+                    <div className="calv-week-slots">
+                      {availableCamps.length === 0 ? (
+                        <div className="calv-slot calv-slot-empty">No camps available</div>
+                      ) : availableCamps.map(camp => {
+                        const isAssigned = calAssignments[wid] === camp.id;
+                        const col2 = campColorMap[camp.id];
+                        return (
+                          <button
+                            key={camp.id}
+                            className={`calv-slot ${isAssigned ? "calv-slot-active" : ""}`}
+                            style={isAssigned ? { background: col2.bg, borderColor: col2.border, color: col2.text } : {}}
+                            onClick={(e) => { e.stopPropagation(); onAssign(wid, camp.id); }}
+                          >
+                            <span className="calv-slot-emoji">{CAT_EMOJI[camp.category]}</span>
+                            <div className="calv-slot-info">
+                              <div className="calv-slot-name">{camp.name}</div>
+                              <div className="calv-slot-price">${camp.price}/wk</div>
+                            </div>
+                            {isAssigned && <span className="calv-slot-check">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="calv-week-meta">
+                      {isUserWeek && !assignedCamp && <div className="calv-week-flag">your week</div>}
+                      {assignedCamp && <div className="calv-week-cost" style={{ color: col?.text }}>${assignedCamp.price}</div>}
+                      <div className="calv-drill-hint">→</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── DAY VIEW ──
+  if (calView === "day" && selectedWeek) {
+    const wk = weekMap[selectedWeek];
+    const days = getWeekDays(wk.dates);
+    const assignedCamp = calAssignments[selectedWeek] ? MOCK_CAMPS.find(c => c.id === calAssignments[selectedWeek]) : null;
+    const availableCamps = camps.filter(c => c.weeks.includes(selectedWeek));
+
+    return (
+      <div className="calv-content">
+        <div className="calv-view-label">
+          <button className="calv-breadcrumb" onClick={goBackToWeek}>← All weeks</button>
+          <span className="calv-view-current">{wk.label} · {wk.dates}</span>
+          <span className="calv-view-hint">Click a day for hourly detail</span>
+        </div>
+
+        {assignedCamp && (
+          <div className="calv-day-assigned" style={{ borderColor: campColorMap[assignedCamp.id]?.border }}>
+            <span className="calv-slot-emoji">{CAT_EMOJI[assignedCamp.category]}</span>
+            <div>
+              <strong>{assignedCamp.name}</strong> — {assignedCamp.program}
+              <div className="calv-day-assigned-meta">{assignedCamp.hours} · ${assignedCamp.price}/wk</div>
+            </div>
+          </div>
+        )}
+
+        <div className="calv-day-grid">
+          {days.map((day, i) => (
+            <button
+              key={i}
+              className="calv-day-card"
+              onClick={() => drillToHour(day)}
+            >
+              <div className="calv-day-name">{day.label}</div>
+              <div className="calv-day-date">{day.date}</div>
+              {assignedCamp && (
+                <div className="calv-day-camp" style={{ background: campColorMap[assignedCamp.id]?.bg, color: campColorMap[assignedCamp.id]?.text }}>
+                  {assignedCamp.name}
+                  <span className="calv-day-camp-hours">{assignedCamp.hours}</span>
+                </div>
+              )}
+              {!assignedCamp && availableCamps.length > 0 && (
+                <div className="calv-day-avail">{availableCamps.length} camp{availableCamps.length !== 1 ? "s" : ""} available</div>
+              )}
+              <div className="calv-drill-hint">→</div>
+            </button>
+          ))}
+        </div>
+
+        {!assignedCamp && availableCamps.length > 0 && (
+          <div className="calv-day-assign-section">
+            <div className="calv-sidebar-title">Assign a camp to this week</div>
+            <div className="calv-week-slots">
+              {availableCamps.map(camp => {
+                const col2 = campColorMap[camp.id];
+                return (
+                  <button key={camp.id} className="calv-slot" onClick={() => onAssign(selectedWeek, camp.id)}>
+                    <span className="calv-slot-emoji">{CAT_EMOJI[camp.category]}</span>
+                    <div className="calv-slot-info">
+                      <div className="calv-slot-name">{camp.name}</div>
+                      <div className="calv-slot-price">${camp.price}/wk</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── HOUR VIEW ──
+  if (calView === "hour" && selectedWeek && selectedDay) {
+    const wk = weekMap[selectedWeek];
+    const assignedCamp = calAssignments[selectedWeek] ? MOCK_CAMPS.find(c => c.id === calAssignments[selectedWeek]) : null;
+    const hours = [];
+    for (let h = 7; h <= 18; h++) {
+      const hour12 = h > 12 ? h - 12 : h;
+      const ampm = h >= 12 ? "PM" : "AM";
+      hours.push({ hour: h, label: `${hour12}:00 ${ampm}` });
+    }
+
+    const campHours = assignedCamp ? getHourBlocks(assignedCamp.hours) : [];
+    const campHourSet = new Set(campHours.map(b => b.hour));
+    const col = assignedCamp ? campColorMap[assignedCamp.id] : null;
+
+    return (
+      <div className="calv-content">
+        <div className="calv-view-label">
+          <button className="calv-breadcrumb" onClick={goBackToDay}>← {wk.label}</button>
+          <span className="calv-view-current">{selectedDay.label}, {selectedDay.date}</span>
+        </div>
+
+        <div className="calv-hour-grid">
+          {hours.map(({ hour, label }) => {
+            const isCamp = campHourSet.has(hour);
+            return (
+              <div key={hour} className={`calv-hour-row${isCamp ? " calv-hour-active" : ""}`}>
+                <div className="calv-hour-label">{label}</div>
+                <div className="calv-hour-block" style={isCamp && col ? { background: col.bg, borderColor: col.border, color: col.text } : {}}>
+                  {isCamp && assignedCamp ? (
+                    <div className="calv-hour-camp">
+                      <span>{CAT_EMOJI[assignedCamp.category]} {assignedCamp.name}</span>
+                      {hour === campHours[0]?.hour && (
+                        <span className="calv-hour-detail">{assignedCamp.program}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="calv-hour-free">Available</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
