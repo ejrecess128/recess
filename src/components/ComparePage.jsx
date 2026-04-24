@@ -1,14 +1,6 @@
 import { useState } from "react";
 import { MOCK_CAMPS, SUMMER_WEEKS } from "../data/camps";
 
-const CAT_COLORS = {
-  "Creative Arts":      { bg: "#FFF0EB", text: "#E05A2B" },
-  "Sports & Athletics": { bg: "#E6F4F5", text: "#068D9D" },
-  "STEM & Technology":  { bg: "#EFF6FF", text: "#2563EB" },
-  "Outdoor & Adventure":{ bg: "#F0FDF4", text: "#15803D" },
-  "Performing Arts":    { bg: "#F5F3FF", text: "#7C3AED" },
-};
-
 const CAT_EMOJI = {
   "Creative Arts": "🎨",
   "Sports & Athletics": "⚽",
@@ -50,13 +42,12 @@ const CRITERIA = [
 ];
 
 export default function ComparePage({ planIds, filters, onBack, onTogglePlan }) {
-  const [view, setView] = useState("compare"); // "compare" | "calendar"
-  const [calAssignments, setCalAssignments] = useState({}); // weekId -> campId
+  const [view, setView] = useState("compare");
+  const [calAssignments, setCalAssignments] = useState({});
   const [exportMsg, setExportMsg] = useState(null);
 
   const camps = MOCK_CAMPS.filter(c => planIds.includes(c.id));
 
-  // ── calendar helpers ──
   function assignWeek(weekId, campId) {
     setCalAssignments(prev => {
       const next = { ...prev };
@@ -71,7 +62,6 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan }) 
     return sum + (camp ? camp.price : 0);
   }, 0);
 
-  // ── export ──
   function handleExport(type) {
     const labels = {
       pdf:   "Generating PDF…",
@@ -85,45 +75,40 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan }) 
 
   return (
     <div className="compare-page">
-      {/* ── page header ── */}
-      <div className="cp-page-header">
-        <div className="cp-page-header-left">
-          <button className="cp-back-btn" onClick={onBack}>← Back to camps</button>
-          <h1 className="cp-page-title">
+      <div className="cp-header">
+        <div className="cp-header-left">
+          <button className="cp-back" onClick={onBack}>← Back to camps</button>
+          <h1 className="cp-title">
             Compare camps
-            <span className="cp-camp-count">{camps.length} selected</span>
+            <span className="cp-count">{camps.length} selected</span>
           </h1>
         </div>
 
-        <div className="cp-view-toggle">
-          <button
-            className={`cp-toggle-btn ${view === "compare" ? "active" : ""}`}
-            onClick={() => setView("compare")}
-          >
-            ⊞ Comparison
+        <div className="cp-tabs">
+          <button className={`cp-tab${view === "compare" ? " active" : ""}`} onClick={() => setView("compare")}>
+            Comparison
           </button>
-          <button
-            className={`cp-toggle-btn ${view === "calendar" ? "active" : ""}`}
-            onClick={() => setView("calendar")}
-          >
-            📅 Calendar
+          <button className={`cp-tab${view === "calendar" ? " active" : ""}`} onClick={() => setView("calendar")}>
+            Calendar
           </button>
         </div>
 
-        <div className="cp-export-group">
-          <button className="cp-export-btn" onClick={() => handleExport("link")}>Share link</button>
-          <button className="cp-export-btn" onClick={() => handleExport("pdf")}>Export PDF</button>
+        <div className="cp-actions">
+          <button className="cp-action-btn" onClick={() => handleExport("link")}>Share link</button>
+          <button className="cp-action-btn" onClick={() => handleExport("pdf")}>Export PDF</button>
         </div>
       </div>
 
       {exportMsg && <div className="cp-toast">{exportMsg}</div>}
 
       {camps.length === 0 ? (
-        <div className="cp-empty-state">
-          <div className="cp-empty-icon">📋</div>
-          <h2>No camps selected yet</h2>
-          <p>Head back to the feed and add camps using the "+ Add" button to compare them here.</p>
-          <button className="cp-back-btn-lg" onClick={onBack}>Browse camps</button>
+        <div className="cp-empty">
+          <div className="cp-empty-visual">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><rect x="8" y="8" width="48" height="48" rx="12" stroke="#E2E2E2" strokeWidth="2" strokeDasharray="6 4"/><path d="M28 32h8M32 28v8" stroke="#C5C5C5" strokeWidth="2" strokeLinecap="round"/></svg>
+          </div>
+          <h2>No camps to compare yet</h2>
+          <p>Add camps from the feed using the compare button on each card.</p>
+          <button className="cp-empty-btn" onClick={onBack}>Browse camps</button>
         </div>
       ) : view === "compare" ? (
         <CompareView camps={camps} filters={filters} onTogglePlan={onTogglePlan} planIds={planIds} />
@@ -142,76 +127,54 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan }) 
 }
 
 /* ═══════════════════════════════════════════
-   COMPARISON VIEW
+   COMPARISON VIEW — constrained columns
 ═══════════════════════════════════════════ */
 function CompareView({ camps, filters, onTogglePlan, planIds }) {
   return (
-    <div className="cv-wrap">
-      {/* left criteria column + scrollable camp columns */}
-      <div className="cv-table">
-
-        {/* sticky left column: criteria labels */}
-        <div className="cv-col cv-col-labels">
-          <div className="cv-header-cell cv-label-header">Your filters</div>
+    <div className="cv-container">
+      <div className="cv-grid" style={{ "--camp-count": camps.length }}>
+        {/* Labels column */}
+        <div className="cv-labels">
+          <div className="cv-label-head">Criteria</div>
           {CRITERIA.map(cr => (
-            <div key={cr.key} className="cv-cell cv-label-cell">
-              {cr.label}
-            </div>
+            <div key={cr.key} className="cv-label">{cr.label}</div>
           ))}
-          <div className="cv-cell cv-label-cell cv-label-action">Actions</div>
+          <div className="cv-label">Actions</div>
         </div>
 
-        {/* one column per camp */}
-        {camps.map((camp, idx) => {
-          const colors = CAT_COLORS[camp.category] || { bg: "#f0f0f0", text: "#666" };
+        {/* Camp columns */}
+        {camps.map((camp) => {
           const inPlan = planIds.includes(camp.id);
           return (
-            <div key={camp.id} className={`cv-col cv-col-camp ${idx === 0 ? "cv-col-first" : ""}`}>
-              {/* camp header card */}
-              <div className="cv-header-cell cv-camp-header">
-                <div className="cv-camp-emoji-wrap" style={{ background: colors.bg }}>
-                  <span className="cv-camp-emoji">{CAT_EMOJI[camp.category]}</span>
+            <div key={camp.id} className="cv-camp-col">
+              <div className="cv-camp-head">
+                <img src={camp.image} alt={camp.name} className="cv-camp-photo" />
+                <div className="cv-camp-info">
+                  <span className="cv-camp-provider">{camp.provider}</span>
+                  <span className="cv-camp-name">{camp.name}</span>
+                  <span className="cv-camp-program">{camp.program}</span>
                 </div>
-                <div className="cv-camp-tag" style={{ background: colors.bg, color: colors.text }}>
-                  {camp.category}
-                </div>
-                <div className="cv-camp-name">{camp.name}</div>
-                <div className="cv-camp-program">{camp.program}</div>
-                <div className="cv-camp-provider">{camp.provider}</div>
-                {camp.image && (
-                  <img
-                    src={camp.image}
-                    alt={camp.name}
-                    className="cv-camp-img"
-                    onError={e => { e.target.style.display = "none"; }}
-                  />
-                )}
               </div>
 
-              {/* criteria cells */}
               {CRITERIA.map(cr => {
                 const passes = cr.check(camp, filters);
                 return (
-                  <div key={cr.key} className={`cv-cell cv-data-cell ${passes ? "cv-pass" : "cv-fail"}`}>
-                    <span className={`cv-check-icon ${passes ? "pass" : "fail"}`}>
+                  <div key={cr.key} className={`cv-val ${passes ? "cv-val--pass" : "cv-val--fail"}`}>
+                    <span className={`cv-icon ${passes ? "cv-icon--pass" : "cv-icon--fail"}`}>
                       {passes ? "✓" : "✗"}
                     </span>
-                    <span className="cv-data-val">{cr.render(camp, filters)}</span>
+                    <span>{cr.render(camp, filters)}</span>
                   </div>
                 );
               })}
 
-              {/* action row */}
-              <div className="cv-cell cv-action-cell">
+              <div className="cv-val cv-val--action">
                 <button
-                  className={`add-btn ${inPlan ? "added" : ""}`}
+                  className={`cv-remove-btn${inPlan ? "" : " cv-remove-btn--add"}`}
                   onClick={() => onTogglePlan(camp.id)}
                 >
-                  {inPlan ? "✓ In plan" : "+ Add to plan"}
+                  {inPlan ? "Remove" : "Add back"}
                 </button>
-                {camp.highlights.map(h => (
-                  <span key={h} className="highlight-tag" style={{ marginTop: 4 }}>{h}</span>
-                ))}
               </div>
             </div>
           );
@@ -237,7 +200,6 @@ function CalendarView({ camps, filters, calAssignments, onAssign, totalCost, onE
 
   return (
     <div className="calv-wrap">
-      {/* left: filter summary */}
       <div className="calv-sidebar">
         <div className="calv-sidebar-section">
           <div className="calv-sidebar-title">Your criteria</div>
@@ -251,7 +213,7 @@ function CalendarView({ camps, filters, calAssignments, onAssign, totalCost, onE
 
         <div className="calv-sidebar-section">
           <div className="calv-sidebar-title">Camps</div>
-          {camps.map((c, i) => {
+          {camps.map((c) => {
             const col = campColorMap[c.id];
             const weeksBooked = Object.entries(calAssignments).filter(([, cid]) => cid === c.id).length;
             return (
@@ -285,11 +247,10 @@ function CalendarView({ camps, filters, calAssignments, onAssign, totalCost, onE
 
         <div className="plan-tip">
           <span>💡</span>
-          <span>Most Austin families book 4–6 weeks per child. Click any week to assign a camp.</span>
+          <span>Click any week to assign a camp.</span>
         </div>
       </div>
 
-      {/* right: calendar grid */}
       <div className="calv-grid">
         {WEEK_MONTHS.map(month => (
           <div key={month.label} className="calv-month">
@@ -337,7 +298,7 @@ function CalendarView({ camps, filters, calAssignments, onAssign, totalCost, onE
                     </div>
 
                     {isUserWeek && !assignedCamp && (
-                      <div className="calv-week-flag">📌 your week</div>
+                      <div className="calv-week-flag">your week</div>
                     )}
                     {assignedCamp && (
                       <div className="calv-week-cost" style={{ color: col?.text }}>

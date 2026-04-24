@@ -40,7 +40,7 @@ export const MOCK_CAMPS = [
     description: "Explore painting, sculpture, and mixed media with professional artists in a real working arts center.",
     rating: 4.8,
     reviews: 124,
-    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1560421683-6856ea585c78?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 2,
@@ -62,7 +62,7 @@ export const MOCK_CAMPS = [
     description: "Intensive swim training with certified coaches. All skill levels welcome from beginner to competitive.",
     rating: 4.9,
     reviews: 89,
-    image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 3,
@@ -84,7 +84,7 @@ export const MOCK_CAMPS = [
     description: "Combine outdoor exploration with hands-on science experiments, robotics, and nature journaling.",
     rating: 4.7,
     reviews: 203,
-    image: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 4,
@@ -106,7 +106,7 @@ export const MOCK_CAMPS = [
     description: "Learn Scratch and Python while building your own games. End of week showcase for families.",
     rating: 4.6,
     reviews: 67,
-    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 5,
@@ -128,7 +128,7 @@ export const MOCK_CAMPS = [
     description: "Study acting, movement, and voice with professional theater artists. Culminates in a Friday performance.",
     rating: 4.9,
     reviews: 156,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 6,
@@ -150,7 +150,7 @@ export const MOCK_CAMPS = [
     description: "Train with Austin FC coaches. Skill sessions, scrimmages, and a fun Friday tournament.",
     rating: 4.8,
     reviews: 312,
-    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 7,
@@ -172,7 +172,7 @@ export const MOCK_CAMPS = [
     description: "Hiking, creek exploration, wildlife identification, and outdoor survival skills in the Texas Hill Country.",
     rating: 4.7,
     reviews: 88,
-    image: "https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=500&fit=crop&auto=format",
   },
   {
     id: 8,
@@ -194,6 +194,6 @@ export const MOCK_CAMPS = [
     description: "Explore world music, movement, and rhythm. Students record an original piece in a professional studio.",
     rating: 4.8,
     reviews: 44,
-    image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&h=340&fit=crop&auto=format",
+    image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=500&fit=crop&auto=format",
   },
 ];
