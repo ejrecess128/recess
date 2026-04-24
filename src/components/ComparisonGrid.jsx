@@ -18,8 +18,8 @@ const CAT_EMOJI = {
 
 function MatchBadge({ score, maxScore }) {
   const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  if (pct >= 90) return <div className="match-badge best">⭐ Best Match</div>;
-  if (pct >= 65) return <div className="match-badge good">✓ Good Match</div>;
+  if (pct >= 90) return <div className="match-badge best">Best Match</div>;
+  if (pct >= 65) return <div className="match-badge good">Good Match</div>;
   return <div className="match-badge partial">Partial Match</div>;
 }
 
@@ -33,7 +33,7 @@ function AvailBar({ remaining, total }) {
         <div className={`avail-fill ${urgent ? "urgent" : low ? "low" : "ok"}`} style={{ width: `${pct}%` }} />
       </div>
       <span className={`avail-text ${urgent ? "urgent" : ""}`}>
-        {urgent ? `⚡ Only ${remaining} spots left!` : `${remaining} of ${total} spots`}
+        {urgent ? `Only ${remaining} spots left` : `${remaining} of ${total} spots`}
       </span>
     </div>
   );
@@ -67,19 +67,9 @@ function StarRating({ rating }) {
   );
 }
 
-export default function ComparisonGrid({ camps, maxScore, filters, planIds, togglePlan }) {
+export default function ComparisonGrid({ camps, maxScore, filters, planIds, togglePlan, cartIds, toggleCart }) {
   return (
     <div className="grid-wrap">
-      <div className="grid-header-row">
-        <h2 className="grid-title">
-          {camps.length} camps found
-          {filters.weeks.length > 0 && (
-            <span className="grid-subtitle"> · {filters.weeks.length} week{filters.weeks.length !== 1 ? "s" : ""} selected</span>
-          )}
-        </h2>
-        <p className="grid-hint">Sorted by best match for your criteria — adjust filters to re-rank</p>
-      </div>
-
       <div className="comparison-table">
         <div className="col-headers">
           <div className="col-h camp-col">Camp & Program</div>
@@ -89,7 +79,7 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
           <div className="col-h">Availability</div>
           <div className="col-h">Your Weeks</div>
           <div className="col-h">Match</div>
-          <div className="col-h">Plan</div>
+          <div className="col-h"></div>
         </div>
 
         {camps.map((camp, idx) => {
@@ -97,17 +87,17 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
           const isBest = pct >= 90;
           const isGood = pct >= 65;
           const inPlan = planIds.includes(camp.id);
+          const inCart = cartIds.includes(camp.id);
           const colors = CAT_COLORS[camp.category] || { bg: "#f0f0f0", text: "#666" };
           const availableMyWeeks = filters.weeks.filter((w) => camp.weeks.includes(w));
 
           return (
             <div
               key={camp.id}
-              className={`camp-row ${isBest ? "row-best" : isGood ? "row-good" : ""} ${inPlan ? "row-inplan" : ""}`}
+              className={`camp-row ${isBest ? "row-best" : isGood ? "row-good" : ""} ${inCart ? "row-incart" : ""}`}
             >
               {isBest && <div className="best-indicator" />}
 
-              {/* Camp image + info */}
               <div className="camp-col-cell">
                 {camp.image ? (
                   <img
@@ -121,9 +111,8 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                   {CAT_EMOJI[camp.category]}
                 </div>
                 <div className="camp-info">
-                  <div className="camp-rank">#{idx + 1}</div>
                   <div className="camp-cat-tag" style={{ background: colors.bg, color: colors.text }}>
-                    {CAT_EMOJI[camp.category]} {camp.category}
+                    {camp.category}
                   </div>
                   <div className="camp-name">{camp.name}</div>
                   <div className="camp-program">{camp.program}</div>
@@ -132,7 +121,7 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                     <StarRating rating={camp.rating} />
                     <span className="review-count"> ({camp.reviews})</span>
                   </div>
-                  <div className="camp-location">📍 {camp.location} · {camp.distance} mi</div>
+                  <div className="camp-location">{camp.location} · {camp.distance} mi</div>
                   <div className="camp-highlights">
                     {camp.highlights.map((h) => (
                       <span key={h} className="highlight-tag">{h}</span>
@@ -141,7 +130,6 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                 </div>
               </div>
 
-              {/* Price */}
               <div className="cell">
                 <span className={`price-val ${camp.price > filters.budget ? "over-budget" : ""}`}>
                   ${camp.price}
@@ -149,25 +137,21 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                 {camp.price > filters.budget && <span className="over-tag">over budget</span>}
               </div>
 
-              {/* Ages */}
               <div className="cell">
                 <span className={`ages-val ${filters.childAge >= camp.ageMin && filters.childAge <= camp.ageMax ? "age-match" : "age-miss"}`}>
                   {camp.ageMin}–{camp.ageMax}
                 </span>
               </div>
 
-              {/* Hours */}
               <div className="cell">
                 <span className="hours-val">{camp.type}</span>
                 <span className="hours-time">{camp.hours}</span>
               </div>
 
-              {/* Availability */}
               <div className="cell">
                 <AvailBar remaining={camp.spotsRemaining} total={camp.totalSpots} />
               </div>
 
-              {/* Week dots */}
               <div className="cell weeks-cell">
                 <WeekDots campWeeks={camp.weeks} selectedWeeks={filters.weeks} />
                 {filters.weeks.length > 0 && (
@@ -175,7 +159,6 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                 )}
               </div>
 
-              {/* Match */}
               <div className="cell match-cell">
                 <MatchBadge score={camp.score} maxScore={maxScore} />
                 <div className="match-score-bar">
@@ -188,10 +171,18 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                 </div>
               </div>
 
-              {/* Add to plan */}
-              <div className="cell plan-cell">
-                <button className={`add-btn ${inPlan ? "added" : ""}`} onClick={() => togglePlan(camp.id)}>
-                  {inPlan ? "✓ Added" : "+ Add"}
+              <div className="cell actions-cell">
+                <button
+                  className={`action-btn cart-btn ${inCart ? "active" : ""}`}
+                  onClick={() => toggleCart(camp.id)}
+                >
+                  {inCart ? "✓ In cart" : "Add to cart"}
+                </button>
+                <button
+                  className={`action-btn compare-btn ${inPlan ? "active" : ""}`}
+                  onClick={() => togglePlan(camp.id)}
+                >
+                  {inPlan ? "✓ Comparing" : "Compare"}
                 </button>
               </div>
             </div>

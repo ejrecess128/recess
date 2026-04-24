@@ -1,4 +1,4 @@
-export default function Header({ compareCount = 0, onCompareClick, onLogoClick, showingCompare, minimal, childName }) {
+export default function Header({ compareCount = 0, cartCount = 0, onCompareClick, onLogoClick, showingCompare, minimal, childName }) {
   return (
     <header className="header">
       <div className="header-inner">
@@ -12,19 +12,29 @@ export default function Header({ compareCount = 0, onCompareClick, onLogoClick, 
             <div className="header-tagline">
               {childName ? `Planning for ${childName}` : "Find & book camps your kids will love"}
             </div>
-            <button
-              className={`compare-nav-btn ${showingCompare ? "compare-nav-btn-active" : ""}`}
-              onClick={showingCompare ? onLogoClick : onCompareClick}
-            >
-              {showingCompare ? "← Back to camps" : (
-                <>
-                  Compare & Plan
-                  {compareCount > 0 && (
-                    <span className="compare-nav-badge">{compareCount}</span>
+            <div className="header-actions">
+              <button
+                className={`compare-nav-btn ${showingCompare ? "compare-nav-btn-active" : ""}`}
+                onClick={showingCompare ? onLogoClick : onCompareClick}
+              >
+                {showingCompare ? "← Back to camps" : (
+                  <>
+                    Compare
+                    {compareCount > 0 && (
+                      <span className="compare-nav-badge">{compareCount}</span>
+                    )}
+                  </>
+                )}
+              </button>
+              {!showingCompare && (
+                <div className="cart-indicator">
+                  <span className="cart-icon">🛒</span>
+                  {cartCount > 0 && (
+                    <span className="cart-badge">{cartCount}</span>
                   )}
-                </>
+                </div>
               )}
-            </button>
+            </div>
           </>
         )}
       </div>

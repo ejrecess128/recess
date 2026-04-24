@@ -2,7 +2,6 @@ import { useState } from "react";
 import Onboarding from "./components/Onboarding";
 import FilterPanel from "./components/FilterPanel";
 import ComparisonGrid from "./components/ComparisonGrid";
-import MyPlan from "./components/MyPlan";
 import Header from "./components/Header";
 import ComparePage from "./components/ComparePage";
 import { MOCK_CAMPS } from "./data/camps";
@@ -42,6 +41,7 @@ export default function App() {
   const [onboarded, setOnboarded] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [planIds, setPlanIds] = useState([]);
+  const [cartIds, setCartIds] = useState([]);
   const [view, setView] = useState("feed");
 
   const handleOnboardingComplete = (data) => {
@@ -84,8 +84,11 @@ export default function App() {
     );
   };
 
-  const planCamps = MOCK_CAMPS.filter((c) => planIds.includes(c.id));
-  const totalCost = planCamps.reduce((sum, c) => sum + c.price, 0);
+  const toggleCart = (id) => {
+    setCartIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   if (view === "compare") {
     return (
@@ -111,12 +114,13 @@ export default function App() {
     <div className="app">
       <Header
         compareCount={planIds.length}
+        cartCount={cartIds.length}
         onCompareClick={() => setView("compare")}
         onLogoClick={() => setView("feed")}
         showingCompare={false}
         childName={filters.childName}
       />
-      <div className="app-body">
+      <div className="app-body two-col">
         <FilterPanel filters={filters} setFilters={setFilters} />
         <div className="main-content">
           <ComparisonGrid
@@ -125,15 +129,10 @@ export default function App() {
             filters={filters}
             planIds={planIds}
             togglePlan={togglePlan}
+            cartIds={cartIds}
+            toggleCart={toggleCart}
           />
         </div>
-        <MyPlan
-          camps={planCamps}
-          totalCost={totalCost}
-          togglePlan={togglePlan}
-          onCompareClick={() => setView("compare")}
-          childName={filters.childName}
-        />
       </div>
     </div>
   );
