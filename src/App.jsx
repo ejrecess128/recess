@@ -105,6 +105,8 @@ export default function App() {
           filters={filters}
           onBack={() => setView("feed")}
           onTogglePlan={togglePlan}
+          cartIds={cartIds}
+          toggleCart={toggleCart}
         />
       </div>
     );
