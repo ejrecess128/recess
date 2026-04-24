@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Onboarding from "./components/Onboarding";
 import FilterPanel from "./components/FilterPanel";
 import ComparisonGrid from "./components/ComparisonGrid";
 import MyPlan from "./components/MyPlan";
@@ -8,6 +9,7 @@ import { MOCK_CAMPS } from "./data/camps";
 import "./index.css";
 
 const DEFAULT_FILTERS = {
+  childName: "",
   childAge: 8,
   budget: 400,
   weeks: [],
@@ -37,9 +39,37 @@ function scoreCamp(camp, filters) {
 }
 
 export default function App() {
+  const [onboarded, setOnboarded] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [planIds, setPlanIds] = useState([]);
   const [view, setView] = useState("feed");
+
+  const handleOnboardingComplete = (data) => {
+    setFilters({
+      childName: data.childName,
+      childAge: data.childAge,
+      budget: data.budget,
+      weeks: data.weeks,
+      categories: data.categories,
+      dayType: data.dayType,
+    });
+    setOnboarded(true);
+  };
+
+  if (!onboarded) {
+    return (
+      <div className="app">
+        <Header
+          compareCount={0}
+          onCompareClick={() => {}}
+          onLogoClick={() => {}}
+          showingCompare={false}
+          minimal
+        />
+        <Onboarding onComplete={handleOnboardingComplete} />
+      </div>
+    );
+  }
 
   const scoredCamps = MOCK_CAMPS.map((camp) => ({
     ...camp,
@@ -65,6 +95,7 @@ export default function App() {
           onCompareClick={() => setView("compare")}
           onLogoClick={() => setView("feed")}
           showingCompare={true}
+          childName={filters.childName}
         />
         <ComparePage
           planIds={planIds}
@@ -83,6 +114,7 @@ export default function App() {
         onCompareClick={() => setView("compare")}
         onLogoClick={() => setView("feed")}
         showingCompare={false}
+        childName={filters.childName}
       />
       <div className="app-body">
         <FilterPanel filters={filters} setFilters={setFilters} />
@@ -100,6 +132,7 @@ export default function App() {
           totalCost={totalCost}
           togglePlan={togglePlan}
           onCompareClick={() => setView("compare")}
+          childName={filters.childName}
         />
       </div>
     </div>

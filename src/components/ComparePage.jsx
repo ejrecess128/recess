@@ -2,11 +2,11 @@ import { useState } from "react";
 import { MOCK_CAMPS, SUMMER_WEEKS } from "../data/camps";
 
 const CAT_COLORS = {
-  "Creative Arts":     { bg: "#fff0eb", text: "#e05a2b" },
-  "Sports & Athletics":{ bg: "#eaf5ef", text: "#2a7d4f" },
-  "STEM & Technology": { bg: "#eff6ff", text: "#2563eb" },
-  "Outdoor & Adventure":{ bg: "#f0fdf4", text: "#15803d" },
-  "Performing Arts":   { bg: "#f5f3ff", text: "#7c3aed" },
+  "Creative Arts":      { bg: "#FFF0EB", text: "#E05A2B" },
+  "Sports & Athletics": { bg: "#E6F4F5", text: "#068D9D" },
+  "STEM & Technology":  { bg: "#EFF6FF", text: "#2563EB" },
+  "Outdoor & Adventure":{ bg: "#F0FDF4", text: "#15803D" },
+  "Performing Arts":    { bg: "#F5F3FF", text: "#7C3AED" },
 };
 
 const CAT_EMOJI = {
@@ -225,10 +225,10 @@ function CompareView({ camps, filters, onTogglePlan, planIds }) {
    CALENDAR VIEW
 ═══════════════════════════════════════════ */
 const CAMP_COLORS = [
-  { bg: "#eaf5ef", border: "#2a7d4f", text: "#1e5e3a" },
-  { bg: "#eff6ff", border: "#2563eb", text: "#1e4faf" },
-  { bg: "#fff0eb", border: "#e05a2b", text: "#b8421a" },
-  { bg: "#f5f3ff", border: "#7c3aed", text: "#5b21b6" },
+  { bg: "#E6F4F5", border: "#068D9D", text: "#056B76" },
+  { bg: "#EFF6FF", border: "#003DA5", text: "#002D7A" },
+  { bg: "#FFF0EB", border: "#E05A2B", text: "#B8421A" },
+  { bg: "#F5F3FF", border: "#7C3AED", text: "#5B21B6" },
 ];
 
 function CalendarView({ camps, filters, calAssignments, onAssign, totalCost, onExport }) {

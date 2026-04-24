@@ -1,11 +1,11 @@
 import { SUMMER_WEEKS } from "../data/camps";
 
 const CAT_COLORS = {
-  "Creative Arts": { bg: "#fff0eb", text: "#e05a2b" },
-  "Sports & Athletics": { bg: "#eaf5ef", text: "#2a7d4f" },
-  "STEM & Technology": { bg: "#eff6ff", text: "#2563eb" },
-  "Outdoor & Adventure": { bg: "#f0fdf4", text: "#15803d" },
-  "Performing Arts": { bg: "#f5f3ff", text: "#7c3aed" },
+  "Creative Arts": { bg: "#FFF0EB", text: "#E05A2B" },
+  "Sports & Athletics": { bg: "#E6F4F5", text: "#068D9D" },
+  "STEM & Technology": { bg: "#EFF6FF", text: "#2563EB" },
+  "Outdoor & Adventure": { bg: "#F0FDF4", text: "#15803D" },
+  "Performing Arts": { bg: "#F5F3FF", text: "#7C3AED" },
 };
 
 const CAT_EMOJI = {
