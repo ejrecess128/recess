@@ -1,0 +1,87 @@
+import { useState } from "react";
+import FilterPanel from "./components/FilterPanel";
+import ComparisonGrid from "./components/ComparisonGrid";
+import MyPlan from "./components/MyPlan";
+import Header from "./components/Header";
+import { MOCK_CAMPS } from "./data/camps";
+import "./index.css";
+
+const DEFAULT_FILTERS = {
+  childAge: 8,
+  budget: 400,
+  weeks: [],
+  categories: [],
+  dayType: "any",
+};
+
+function scoreCamp(camp, filters) {
+  let score = 0;
+  let reasons = [];
+
+  const ageMatch = filters.childAge >= camp.ageMin && filters.childAge <= camp.ageMax;
+  if (ageMatch) { score += 30; reasons.push("Age match"); }
+
+  const budgetMatch = camp.price <= filters.budget;
+  if (budgetMatch) { score += 20; reasons.push("Within budget"); }
+
+  const weekMatch = filters.weeks.length === 0 || filters.weeks.some((w) => camp.weeks.includes(w));
+  if (weekMatch && filters.weeks.length > 0) { score += 25; reasons.push("Available your weeks"); }
+  if (filters.weeks.length === 0) score += 15;
+
+  const catMatch = filters.categories.length === 0 || filters.categories.includes(camp.category);
+  if (catMatch && filters.categories.length > 0) { score += 20; reasons.push("Matches interests"); }
+  if (filters.categories.length === 0) score += 10;
+
+  const dayMatch = filters.dayType === "any" || camp.type.toLowerCase().includes(filters.dayType);
+  if (dayMatch && filters.dayType !== "any") { score += 5; reasons.push("Day type match"); }
+  if (filters.dayType === "any") score += 3;
+
+  const availPct = camp.spotsRemaining / camp.totalSpots;
+  if (availPct > 0.5) score += 5;
+
+  return { score, reasons };
+}
+
+export default function App() {
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [planIds, setPlanIds] = useState([]);
+
+  const scoredCamps = MOCK_CAMPS.map((camp) => ({
+    ...camp,
+    ...scoreCamp(camp, filters),
+  })).sort((a, b) => b.score - a.score);
+
+  const maxScore = Math.max(...scoredCamps.map((c) => c.score));
+
+  const togglePlan = (id) => {
+    setPlanIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const planCamps = MOCK_CAMPS.filter((c) => planIds.includes(c.id));
+  const totalCost = planCamps.reduce((sum, c) => sum + c.price, 0);
+
+  return (
+    <div className="app">
+      <Header />
+      <div className="app-body">
+        <FilterPanel filters={filters} setFilters={setFilters} />
+        <div className="main-content">
+          <ComparisonGrid
+            camps={scoredCamps}
+            maxScore={maxScore}
+            filters={filters}
+            planIds={planIds}
+            togglePlan={togglePlan}
+          />
+        </div>
+        <MyPlan
+          camps={planCamps}
+          totalCost={totalCost}
+          togglePlan={togglePlan}
+        />
+      </div>
+    </div>
+  );
+}
