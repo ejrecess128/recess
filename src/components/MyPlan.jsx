@@ -1,4 +1,4 @@
-export default function MyPlan({ camps, totalCost, togglePlan }) {
+export default function MyPlan({ camps, totalCost, togglePlan, onCompareClick }) {
   const weeksPlanned = new Set(camps.flatMap((c) => c.weeks)).size;
 
   return (
@@ -45,8 +45,8 @@ export default function MyPlan({ camps, totalCost, togglePlan }) {
             </div>
           </div>
 
-          <button className="book-btn">
-            Book All on Recess →
+          <button className="book-btn" onClick={onCompareClick}>
+            ⊞ Compare & Plan →
           </button>
           <button className="share-btn">Share Plan</button>
         </>
