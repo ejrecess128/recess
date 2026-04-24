@@ -40,6 +40,7 @@ export const MOCK_CAMPS = [
     description: "Explore painting, sculpture, and mixed media with professional artists in a real working arts center.",
     rating: 4.8,
     reviews: 124,
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 2,
@@ -61,6 +62,7 @@ export const MOCK_CAMPS = [
     description: "Intensive swim training with certified coaches. All skill levels welcome from beginner to competitive.",
     rating: 4.9,
     reviews: 89,
+    image: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 3,
@@ -82,6 +84,7 @@ export const MOCK_CAMPS = [
     description: "Combine outdoor exploration with hands-on science experiments, robotics, and nature journaling.",
     rating: 4.7,
     reviews: 203,
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 4,
@@ -103,6 +106,7 @@ export const MOCK_CAMPS = [
     description: "Learn Scratch and Python while building your own games. End of week showcase for families.",
     rating: 4.6,
     reviews: 67,
+    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 5,
@@ -124,6 +128,7 @@ export const MOCK_CAMPS = [
     description: "Study acting, movement, and voice with professional theater artists. Culminates in a Friday performance.",
     rating: 4.9,
     reviews: 156,
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 6,
@@ -145,6 +150,7 @@ export const MOCK_CAMPS = [
     description: "Train with Austin FC coaches. Skill sessions, scrimmages, and a fun Friday tournament.",
     rating: 4.8,
     reviews: 312,
+    image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 7,
@@ -166,6 +172,7 @@ export const MOCK_CAMPS = [
     description: "Hiking, creek exploration, wildlife identification, and outdoor survival skills in the Texas Hill Country.",
     rating: 4.7,
     reviews: 88,
+    image: "https://images.unsplash.com/photo-1528543606781-2f6e6857f318?w=200&h=140&fit=crop&auto=format",
   },
   {
     id: 8,
@@ -187,5 +194,6 @@ export const MOCK_CAMPS = [
     description: "Explore world music, movement, and rhythm. Students record an original piece in a professional studio.",
     rating: 4.8,
     reviews: 44,
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=140&fit=crop&auto=format",
   },
 ];

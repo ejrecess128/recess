@@ -1,33 +1,26 @@
 import { SUMMER_WEEKS } from "../data/camps";
 
 const CAT_COLORS = {
-  "Creative Arts": "#f97316",
-  "Sports & Athletics": "#22c55e",
-  "STEM & Technology": "#3b82f6",
-  "Outdoor & Adventure": "#84cc16",
-  "Performing Arts": "#a855f7",
+  "Creative Arts": { bg: "#fff0eb", text: "#e05a2b" },
+  "Sports & Athletics": { bg: "#eaf5ef", text: "#2a7d4f" },
+  "STEM & Technology": { bg: "#eff6ff", text: "#2563eb" },
+  "Outdoor & Adventure": { bg: "#f0fdf4", text: "#15803d" },
+  "Performing Arts": { bg: "#f5f3ff", text: "#7c3aed" },
 };
 
-function MatchBadge({ score, maxScore, reasons }) {
-  const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  const isBest = pct >= 90;
-  const isGood = pct >= 65;
+const CAT_EMOJI = {
+  "Creative Arts": "🎨",
+  "Sports & Athletics": "⚽",
+  "STEM & Technology": "🤖",
+  "Outdoor & Adventure": "🌲",
+  "Performing Arts": "🎭",
+};
 
-  if (isBest) return (
-    <div className="match-badge best">
-      <span>⭐ Best Match</span>
-    </div>
-  );
-  if (isGood) return (
-    <div className="match-badge good">
-      <span>✓ Good Match</span>
-    </div>
-  );
-  return (
-    <div className="match-badge partial">
-      <span>Partial Match</span>
-    </div>
-  );
+function MatchBadge({ score, maxScore }) {
+  const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+  if (pct >= 90) return <div className="match-badge best">⭐ Best Match</div>;
+  if (pct >= 65) return <div className="match-badge good">✓ Good Match</div>;
+  return <div className="match-badge partial">Partial Match</div>;
 }
 
 function AvailBar({ remaining, total }) {
@@ -37,10 +30,7 @@ function AvailBar({ remaining, total }) {
   return (
     <div className="avail-wrap">
       <div className="avail-bar">
-        <div
-          className={`avail-fill ${urgent ? "urgent" : low ? "low" : "ok"}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`avail-fill ${urgent ? "urgent" : low ? "low" : "ok"}`} style={{ width: `${pct}%` }} />
       </div>
       <span className={`avail-text ${urgent ? "urgent" : ""}`}>
         {urgent ? `⚡ Only ${remaining} spots left!` : `${remaining} of ${total} spots`}
@@ -68,50 +58,46 @@ function WeekDots({ campWeeks, selectedWeeks }) {
 }
 
 function StarRating({ rating }) {
+  const full = Math.round(rating);
   return (
     <span className="star-rating">
-      {"★".repeat(Math.round(rating))}
-      {"☆".repeat(5 - Math.round(rating))}
+      {"★".repeat(full)}{"☆".repeat(5 - full)}
       <span className="rating-num"> {rating}</span>
     </span>
   );
 }
 
 export default function ComparisonGrid({ camps, maxScore, filters, planIds, togglePlan }) {
-  const topScore = maxScore;
-
   return (
     <div className="grid-wrap">
       <div className="grid-header-row">
         <h2 className="grid-title">
           {camps.length} camps found
           {filters.weeks.length > 0 && (
-            <span className="grid-subtitle"> · {filters.weeks.length} week{filters.weeks.length > 1 ? "s" : ""} selected</span>
+            <span className="grid-subtitle"> · {filters.weeks.length} week{filters.weeks.length !== 1 ? "s" : ""} selected</span>
           )}
         </h2>
-        <p className="grid-hint">Sorted by best match for your criteria</p>
+        <p className="grid-hint">Sorted by best match for your criteria — adjust filters to re-rank</p>
       </div>
 
       <div className="comparison-table">
-        {/* Column headers */}
         <div className="col-headers">
           <div className="col-h camp-col">Camp & Program</div>
-          <div className="col-h">Price / wk</div>
+          <div className="col-h">Price/wk</div>
           <div className="col-h">Ages</div>
-          <div className="col-h">Hours</div>
+          <div className="col-h">Schedule</div>
           <div className="col-h">Availability</div>
           <div className="col-h">Your Weeks</div>
           <div className="col-h">Match</div>
           <div className="col-h">Plan</div>
         </div>
 
-        {/* Camp rows */}
         {camps.map((camp, idx) => {
-          const pct = topScore > 0 ? (camp.score / topScore) * 100 : 0;
+          const pct = maxScore > 0 ? (camp.score / maxScore) * 100 : 0;
           const isBest = pct >= 90;
           const isGood = pct >= 65;
           const inPlan = planIds.includes(camp.id);
-          const catColor = CAT_COLORS[camp.category] || "#94a3b8";
+          const colors = CAT_COLORS[camp.category] || { bg: "#f0f0f0", text: "#666" };
           const availableMyWeeks = filters.weeks.filter((w) => camp.weeks.includes(w));
 
           return (
@@ -121,18 +107,31 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
             >
               {isBest && <div className="best-indicator" />}
 
-              {/* Camp info */}
-              <div className="cell camp-col">
-                <div className="camp-rank">#{idx + 1}</div>
+              {/* Camp image + info */}
+              <div className="camp-col-cell">
+                {camp.image ? (
+                  <img
+                    src={camp.image}
+                    alt={camp.name}
+                    className="camp-img"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                  />
+                ) : null}
+                <div className="camp-img-placeholder" style={{ display: camp.image ? 'none' : 'flex' }}>
+                  {CAT_EMOJI[camp.category]}
+                </div>
                 <div className="camp-info">
-                  <div className="camp-cat-tag" style={{ background: catColor + "22", color: catColor }}>
-                    {camp.category}
+                  <div className="camp-rank">#{idx + 1}</div>
+                  <div className="camp-cat-tag" style={{ background: colors.bg, color: colors.text }}>
+                    {CAT_EMOJI[camp.category]} {camp.category}
                   </div>
                   <div className="camp-name">{camp.name}</div>
                   <div className="camp-program">{camp.program}</div>
                   <div className="camp-provider">{camp.provider}</div>
-                  <StarRating rating={camp.rating} />
-                  <span className="review-count"> ({camp.reviews})</span>
+                  <div>
+                    <StarRating rating={camp.rating} />
+                    <span className="review-count"> ({camp.reviews})</span>
+                  </div>
                   <div className="camp-location">📍 {camp.location} · {camp.distance} mi</div>
                   <div className="camp-highlights">
                     {camp.highlights.map((h) => (
@@ -143,13 +142,11 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
               </div>
 
               {/* Price */}
-              <div className="cell price-cell">
+              <div className="cell">
                 <span className={`price-val ${camp.price > filters.budget ? "over-budget" : ""}`}>
                   ${camp.price}
                 </span>
-                {camp.price > filters.budget && (
-                  <span className="over-tag">over budget</span>
-                )}
+                {camp.price > filters.budget && <span className="over-tag">over budget</span>}
               </div>
 
               {/* Ages */}
@@ -174,34 +171,27 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
               <div className="cell weeks-cell">
                 <WeekDots campWeeks={camp.weeks} selectedWeeks={filters.weeks} />
                 {filters.weeks.length > 0 && (
-                  <span className="weeks-match-txt">
-                    {availableMyWeeks.length}/{filters.weeks.length} of your weeks
-                  </span>
+                  <span className="weeks-match-txt">{availableMyWeeks.length}/{filters.weeks.length} of your weeks</span>
                 )}
               </div>
 
               {/* Match */}
               <div className="cell match-cell">
-                <MatchBadge score={camp.score} maxScore={topScore} reasons={camp.reasons} />
+                <MatchBadge score={camp.score} maxScore={maxScore} />
                 <div className="match-score-bar">
                   <div className="match-score-fill" style={{ width: `${pct}%` }} />
                 </div>
-                {camp.reasons.length > 0 && (
-                  <div className="match-reasons">
-                    {camp.reasons.map((r) => (
-                      <span key={r} className="reason-tag">✓ {r}</span>
-                    ))}
-                  </div>
-                )}
+                <div className="match-reasons">
+                  {camp.reasons.map((r) => (
+                    <span key={r} className="reason-tag">✓ {r}</span>
+                  ))}
+                </div>
               </div>
 
               {/* Add to plan */}
               <div className="cell plan-cell">
-                <button
-                  className={`add-btn ${inPlan ? "added" : ""}`}
-                  onClick={() => togglePlan(camp.id)}
-                >
-                  {inPlan ? "✓ In Plan" : "+ Add"}
+                <button className={`add-btn ${inPlan ? "added" : ""}`} onClick={() => togglePlan(camp.id)}>
+                  {inPlan ? "✓ Added" : "+ Add"}
                 </button>
               </div>
             </div>
