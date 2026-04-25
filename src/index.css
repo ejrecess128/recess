@@ -237,25 +237,68 @@ select.ob-input { cursor: pointer; appearance: none; background-image: url("data
   display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
 }
 
-.ob-calendar { display: flex; flex-direction: column; gap: 14px; }
-.ob-cal-month-label { font-size: 12px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-.ob-cal-weeks { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
-.ob-cal-week {
-  position: relative; display: flex; flex-direction: column; gap: 1px;
-  padding: 10px 12px; border: 1.5px solid var(--neutral-20);
-  border-radius: var(--radius-md); background: var(--surface); cursor: pointer;
-  text-align: left; font-family: var(--font-primary); transition: all 0.15s;
+/* Week calendar picker */
+.wcal { display: flex; flex-direction: column; gap: 20px; }
+.wcal-month {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
 }
-.ob-cal-week:hover { border-color: var(--primary); }
-.ob-cal-week.selected { border-color: var(--primary); background: rgba(0,61,165,0.04); }
-.ob-cal-week-num { font-size: 12px; font-weight: 700; color: var(--text); }
-.ob-cal-week-dates { font-size: 11px; color: var(--text-2); }
-.ob-cal-check {
-  position: absolute; top: 6px; right: 6px; width: 18px; height: 18px;
-  border-radius: 50%; background: var(--primary); color: white;
-  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+.wcal-month-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  background: var(--neutral-10); flex-wrap: wrap; gap: 8px;
 }
-.ob-weeks-summary { margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--primary); }
+.wcal-month-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.wcal-month-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.wcal-week-toggle {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius-pill); background: var(--surface);
+  font: 600 11px/1 var(--font-primary); color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+}
+.wcal-week-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.wcal-week-toggle.selected { border-color: var(--primary); background: rgba(0,61,165,0.06); color: var(--primary); }
+.wcal-checkbox {
+  width: 14px; height: 14px; border-radius: 3px;
+  border: 1.5px solid var(--neutral-30); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.wcal-checkbox.checked {
+  background: var(--primary); border-color: var(--primary);
+}
+
+.wcal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  padding: 8px;
+}
+.wcal-dayhead {
+  text-align: center; font-size: 10px; font-weight: 700;
+  color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 4px 0 8px;
+}
+.wcal-cell {
+  text-align: center; padding: 8px 4px;
+  border-radius: var(--radius-sm); transition: all 0.1s;
+  position: relative;
+}
+.wcal-cell--empty { }
+.wcal-cell--weekend { }
+.wcal-cell--weekend .wcal-day { color: var(--text-3); }
+.wcal-cell--camp { background: rgba(0,61,165,0.04); }
+.wcal-cell--camp:hover { background: rgba(0,61,165,0.1); }
+.wcal-cell--selected {
+  background: var(--primary) !important;
+}
+.wcal-cell--selected .wcal-day { color: white; font-weight: 700; }
+.wcal-day {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  display: inline-block; width: 28px; height: 28px;
+  line-height: 28px; border-radius: 50%;
+}
+
+.ob-weeks-summary { margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--primary); }
 
 .ob-row-fields { display: flex; gap: 24px; margin-bottom: 32px; }
 .ob-day-group { display: flex; gap: 6px; }

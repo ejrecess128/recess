@@ -7,6 +7,7 @@ const INTERESTS = [
   { key: CAMP_CATEGORIES.STEM, label: "STEM & Technology", icon: "🤖", examples: "Coding, Robotics, Science, Engineering" },
   { key: CAMP_CATEGORIES.OUTDOOR, label: "Outdoor & Adventure", icon: "🌲", examples: "Nature, Camping, Hiking" },
   { key: CAMP_CATEGORIES.PERFORMING, label: "Performing Arts", icon: "🎭", examples: "Acting, Dance, Music Performance" },
+  { key: "Multi-Activity", label: "Multi-Activity", icon: "🌈", examples: "Mixed programs, variety camps, rotating activities" },
 ];
 
 const WEEK_GROUPS = [
@@ -14,6 +15,128 @@ const WEEK_GROUPS = [
   { label: "July", weeks: ["w5", "w6", "w7", "w8"] },
   { label: "August", weeks: ["w9", "w10"] },
 ];
+
+// Build actual calendar dates for summer 2025
+const SUMMER_CALENDAR = [
+  {
+    month: "June", year: 2025,
+    // June 2025 starts on Sunday (day 0)
+    startDay: 0, // 0=Sun
+    totalDays: 30,
+    weeks: [
+      { id: "w1", startDate: 9, endDate: 13 },
+      { id: "w2", startDate: 16, endDate: 20 },
+      { id: "w3", startDate: 23, endDate: 27 },
+      { id: "w4", startDate: 30, endDate: 30 }, // crosses into July
+    ],
+  },
+  {
+    month: "July", year: 2025,
+    startDay: 2, // Tuesday
+    totalDays: 31,
+    weeks: [
+      { id: "w4", startDate: 1, endDate: 4 }, // continued from June
+      { id: "w5", startDate: 7, endDate: 11 },
+      { id: "w6", startDate: 14, endDate: 18 },
+      { id: "w7", startDate: 21, endDate: 25 },
+      { id: "w8", startDate: 28, endDate: 31 },
+    ],
+  },
+  {
+    month: "August", year: 2025,
+    startDay: 5, // Friday
+    totalDays: 31,
+    weeks: [
+      { id: "w8", startDate: 1, endDate: 1 }, // continued from July
+      { id: "w9", startDate: 4, endDate: 8 },
+      { id: "w10", startDate: 11, endDate: 15 },
+    ],
+  },
+];
+
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function WeekCalendar({ weeks, toggleWeek }) {
+  // Map each day to which camp week it belongs to
+  function getWeekId(monthData, day) {
+    for (const w of monthData.weeks) {
+      if (day >= w.startDate && day <= w.endDate) return w.id;
+    }
+    return null;
+  }
+
+  return (
+    <div className="wcal">
+      {SUMMER_CALENDAR.map((m) => {
+        // Build grid cells: leading empties + actual days
+        const cells = [];
+        for (let i = 0; i < m.startDay; i++) {
+          cells.push({ type: "empty", key: `e${i}` });
+        }
+        for (let d = 1; d <= m.totalDays; d++) {
+          const weekId = getWeekId(m, d);
+          cells.push({ type: "day", day: d, weekId, key: `d${d}` });
+        }
+
+        // Find which week IDs appear in this month (deduplicated)
+        const monthWeekIds = [...new Set(m.weeks.map(w => w.id))];
+
+        return (
+          <div key={m.month} className="wcal-month">
+            <div className="wcal-month-head">
+              <span className="wcal-month-name">{m.month} {m.year}</span>
+              <div className="wcal-month-actions">
+                {monthWeekIds.map(wid => {
+                  const wk = SUMMER_WEEKS.find(w => w.id === wid);
+                  const selected = weeks.includes(wid);
+                  return (
+                    <button
+                      key={wid}
+                      className={`wcal-week-toggle${selected ? " selected" : ""}`}
+                      onClick={() => toggleWeek(wid)}
+                    >
+                      <span className={`wcal-checkbox${selected ? " checked" : ""}`}>
+                        {selected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      </span>
+                      {wk?.label.replace("Week ", "W")}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="wcal-grid">
+              {DAY_LABELS.map(d => (
+                <div key={d} className="wcal-dayhead">{d}</div>
+              ))}
+              {cells.map(cell => {
+                if (cell.type === "empty") {
+                  return <div key={cell.key} className="wcal-cell wcal-cell--empty" />;
+                }
+                const isInWeek = cell.weekId !== null;
+                const isSelected = cell.weekId && weeks.includes(cell.weekId);
+                const isWeekend = false; // all camp days are weekdays
+                const dayOfWeek = (m.startDay + cell.day - 1) % 7;
+                const isWeekendDay = dayOfWeek === 0 || dayOfWeek === 6;
+
+                return (
+                  <div
+                    key={cell.key}
+                    className={`wcal-cell${isInWeek ? " wcal-cell--camp" : ""}${isSelected ? " wcal-cell--selected" : ""}${isWeekendDay ? " wcal-cell--weekend" : ""}`}
+                    onClick={cell.weekId ? () => toggleWeek(cell.weekId) : undefined}
+                    style={cell.weekId ? { cursor: "pointer" } : undefined}
+                  >
+                    <span className="wcal-day">{cell.day}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function Onboarding({ onComplete }) {
   const [step, setStep] = useState(1);
@@ -186,31 +309,8 @@ export default function Onboarding({ onComplete }) {
 
             <div className="ob-section">
               <label className="ob-label">Which weeks do you need?</label>
-              <p className="ob-hint">Most Austin families book 4-6 weeks of camp</p>
-              <div className="ob-calendar">
-                {WEEK_GROUPS.map((group) => (
-                  <div key={group.label} className="ob-cal-month">
-                    <div className="ob-cal-month-label">{group.label}</div>
-                    <div className="ob-cal-weeks">
-                      {group.weeks.map((wid) => {
-                        const wk = SUMMER_WEEKS.find((w) => w.id === wid);
-                        const selected = weeks.includes(wid);
-                        return (
-                          <button
-                            key={wid}
-                            className={`ob-cal-week ${selected ? "selected" : ""}`}
-                            onClick={() => toggleWeek(wid)}
-                          >
-                            <span className="ob-cal-week-num">{wk.label.replace("Week ", "W")}</span>
-                            <span className="ob-cal-week-dates">{wk.dates}</span>
-                            {selected && <span className="ob-cal-check">&#10003;</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="ob-hint">Most Austin families book 4-6 weeks of camp. Click weeks to select them.</p>
+              <WeekCalendar weeks={weeks} toggleWeek={toggleWeek} />
               {weeks.length > 0 && (
                 <div className="ob-weeks-summary">
                   {weeks.length} week{weeks.length !== 1 ? "s" : ""} selected
