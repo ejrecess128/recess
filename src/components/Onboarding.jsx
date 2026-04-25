@@ -22,6 +22,7 @@ export default function Onboarding({ onComplete }) {
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState(8);
   const [zipCode, setZipCode] = useState("");
+  const [commuteTime, setCommuteTime] = useState(30);
   const [interests, setInterests] = useState([]);
 
   // Step 2 state
@@ -46,6 +47,7 @@ export default function Onboarding({ onComplete }) {
       childName: childName || "Your child",
       childAge,
       zipCode,
+      commuteTime,
       categories: interests,
       weeks,
       dayType,
@@ -122,6 +124,24 @@ export default function Onboarding({ onComplete }) {
                   onChange={(e) => setZipCode(e.target.value)}
                   maxLength={5}
                 />
+              </div>
+
+              <div className="ob-field">
+                <label className="ob-label">How far are you willing to commute?</label>
+                <select
+                  className="ob-input ob-input-short"
+                  value={commuteTime}
+                  onChange={(e) => setCommuteTime(Number(e.target.value))}
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={45}>45 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={75}>1 hr 15 min</option>
+                  <option value={90}>1 hr 30 min</option>
+                  <option value={105}>1 hr 45 min</option>
+                  <option value={120}>2 hours</option>
+                </select>
               </div>
             </div>
 
