@@ -187,6 +187,17 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
               </div>
 
               <button className="cp-summary-cta">Proceed to booking</button>
+
+              <div className="cp-summary-share">
+                <button className="cp-summary-share-btn" onClick={() => handleExport("link")}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M10 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  Share with co-parent
+                </button>
+                <button className="cp-summary-share-btn" onClick={() => handleExport("pdf")}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 14h8a1 1 0 001-1V6l-4-4H4a1 1 0 00-1 1v10a1 1 0 001 1z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Export as PDF
+                </button>
+              </div>
             </>
           )}
 

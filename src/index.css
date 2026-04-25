@@ -811,6 +811,20 @@ input[type=range].slider::-webkit-slider-thumb {
 .cp-summary-cta:hover { background: var(--primary-hover); }
 .cp-summary-cta:active { transform: translateY(1px); }
 
+.cp-summary-share {
+  display: flex; flex-direction: column; gap: 6px; margin-top: 12px;
+}
+.cp-summary-share-btn {
+  width: 100%; padding: 9px 12px;
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  font: 600 12px/1 var(--font-primary); color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+}
+.cp-summary-share-btn:hover { border-color: var(--primary); color: var(--primary); }
+.cp-summary-share-btn svg { flex-shrink: 0; }
+
 .cp-summary-tip {
   display: flex; gap: 6px; margin-top: auto; padding-top: 14px;
   font-size: 11px; color: var(--text-3); line-height: 1.4;
