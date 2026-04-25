@@ -135,9 +135,9 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
               <button className="cp-empty-btn" onClick={onBack}>Browse camps</button>
             </div>
           ) : view === "compare" ? (
-            <CompareView camps={camps} filters={filters} onTogglePlan={onTogglePlan} planIds={planIds} />
+            <CompareView camps={camps} filters={filters} onTogglePlan={onTogglePlan} planIds={planIds} children={children} compareItems={compareItems} cartItems={cartItems} />
           ) : (
-            <CalendarView camps={camps} filters={filters} calAssignments={calAssignments} onAssign={assignWeek} />
+            <CalendarView camps={camps} filters={filters} calAssignments={calAssignments} onAssign={assignWeek} children={children} compareItems={compareItems} cartItems={cartItems} />
           )}
         </div>
 
@@ -286,7 +286,14 @@ function SummarySidebar({ children, cartItems, compareItems, filters, onExport, 
 /* ═══════════════════════════════════════════
    COMPARISON VIEW
 ═══════════════════════════════════════════ */
-function CompareView({ camps, filters, onTogglePlan, planIds }) {
+function CompareView({ camps, filters, onTogglePlan, planIds, children = [], compareItems = [], cartItems = [] }) {
+  // Map camp ID → which children have it selected
+  function getChildrenForCamp(campId) {
+    const allItems = [...compareItems, ...cartItems];
+    const childIds = [...new Set(allItems.filter(i => i.campId === campId).map(i => i.childId))];
+    return children.filter(c => childIds.includes(c.id));
+  }
+
   return (
     <div className="cv-container">
       <div className="cv-grid" style={{ "--camp-count": camps.length }}>
@@ -297,9 +304,18 @@ function CompareView({ camps, filters, onTogglePlan, planIds }) {
         </div>
         {camps.map((camp) => {
           const inPlan = planIds.includes(camp.id);
+          const campChildren = getChildrenForCamp(camp.id);
+          const borderColor = campChildren.length === 1 ? campChildren[0].color : undefined;
           return (
-            <div key={camp.id} className="cv-camp-col">
+            <div key={camp.id} className="cv-camp-col" style={borderColor ? { borderTopColor: borderColor, borderTopWidth: 3 } : {}}>
               <div className="cv-camp-head">
+                {campChildren.length > 0 && children.length > 1 && (
+                  <div className="cv-camp-children">
+                    {campChildren.map(c => (
+                      <span key={c.id} className="cv-child-badge" style={{ background: c.color }}>{c.name}</span>
+                    ))}
+                  </div>
+                )}
                 <img src={camp.image} alt={camp.name} className="cv-camp-photo" />
                 <div className="cv-camp-info">
                   <span className="cv-camp-provider">{camp.provider}</span>
@@ -340,7 +356,13 @@ const CAMP_COLORS = [
   { bg: "#FFF8E6", border: "#D97706", text: "#92400E" },
 ];
 
-function CalendarView({ camps, filters, calAssignments, onAssign }) {
+function CalendarView({ camps, filters, calAssignments, onAssign, children = [], compareItems = [], cartItems = [] }) {
+  // Map camp ID → children who selected it
+  function getChildrenForCamp(campId) {
+    const allItems = [...compareItems, ...cartItems];
+    const childIds = [...new Set(allItems.filter(i => i.campId === campId).map(i => i.childId))];
+    return children.filter(c => childIds.includes(c.id));
+  }
   const [calView, setCalView] = useState("week"); // "week" | "day" | "hour"
   const [selectedWeek, setSelectedWeek] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
@@ -418,6 +440,14 @@ function CalendarView({ camps, filters, calAssignments, onAssign }) {
                             <div className="calv-slot-info">
                               <div className="calv-slot-name">{camp.name}</div>
                               <div className="calv-slot-price">${camp.price}/wk</div>
+                              {children.length > 1 && (() => {
+                                const cc = getChildrenForCamp(camp.id);
+                                return cc.length > 0 ? (
+                                  <div className="calv-slot-children">
+                                    {cc.map(c => <span key={c.id} className="calv-child-dot" style={{ background: c.color }} title={c.name} />)}
+                                  </div>
+                                ) : null;
+                              })()}
                             </div>
                             {isAssigned && <span className="calv-slot-check">✓</span>}
                           </button>
@@ -499,6 +529,14 @@ function CalendarView({ camps, filters, calAssignments, onAssign }) {
                     <div className="calv-slot-info">
                       <div className="calv-slot-name">{camp.name}</div>
                       <div className="calv-slot-price">${camp.price}/wk</div>
+                      {children.length > 1 && (() => {
+                        const cc = getChildrenForCamp(camp.id);
+                        return cc.length > 0 ? (
+                          <div className="calv-slot-children">
+                            {cc.map(c => <span key={c.id} className="calv-child-dot" style={{ background: c.color }} title={c.name} />)}
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                   </button>
                 );
