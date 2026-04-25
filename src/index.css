@@ -473,17 +473,17 @@ input[type=range].slider::-webkit-slider-thumb {
 .card-badge--urgent { background: rgba(220,38,38,0.88); color: white; }
 .card-badge--low { background: rgba(252,186,4,0.88); color: var(--neutral-100); }
 
-.card-compare-fab {
+.card-compare-btn {
   position: absolute; top: 12px; right: 12px;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
+  padding: 6px 14px; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(8px);
   border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--neutral-60); transition: all 0.15s;
+  font: 700 11px/1 var(--font-primary); color: var(--neutral-70);
+  transition: all 0.15s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-.card-compare-fab:hover { background: white; color: var(--primary); transform: scale(1.08); }
-.card-compare-fab.active { background: var(--primary); color: white; }
+.card-compare-btn:hover { background: white; color: var(--primary); }
+.card-compare-btn.active { background: var(--primary); color: white; }
 
 /* Card body */
 .card-body {

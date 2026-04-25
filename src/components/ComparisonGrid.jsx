@@ -39,16 +39,10 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                 <AvailBadge remaining={camp.spotsRemaining} total={camp.totalSpots} />
               </div>
               <button
-                className={`card-compare-fab${inPlan ? " active" : ""}`}
+                className={`card-compare-btn${inPlan ? " active" : ""}`}
                 onClick={() => togglePlan(camp.id)}
-                title={inPlan ? "Remove from comparison" : "Add to comparison"}
-                aria-label="Compare"
               >
-                {inPlan ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.3 4.7L6.5 11.5 2.7 7.7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                )}
+                {inPlan ? "✓ Comparing" : "Compare"}
               </button>
             </div>
 
