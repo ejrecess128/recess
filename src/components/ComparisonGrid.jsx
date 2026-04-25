@@ -21,7 +21,10 @@ function MatchBadge({ score, maxScore }) {
   return null;
 }
 
-export default function ComparisonGrid({ camps, maxScore, filters, planIds, togglePlan, cartIds, toggleCart }) {
+export default function ComparisonGrid({ camps, maxScore, filters, planIds, togglePlan, cartIds, toggleCart, activeChild, sharedCamps }) {
+  // sharedCamps is an array of { camp, children, message } from insights
+  const sharedCampIds = (sharedCamps || []).map(s => s.camp.id);
+
   return (
     <div className="card-grid">
       {camps.map((camp) => {
@@ -29,6 +32,7 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
         const inPlan = planIds.includes(camp.id);
         const inCart = cartIds.includes(camp.id);
         const ageMatch = filters.childAge >= camp.ageMin && filters.childAge <= camp.ageMax;
+        const sharedInfo = (sharedCamps || []).find(s => s.camp.id === camp.id);
 
         return (
           <article key={camp.id} className={`camp-card${inCart ? " camp-card--carted" : ""}`}>
@@ -67,6 +71,11 @@ export default function ComparisonGrid({ camps, maxScore, filters, planIds, togg
                   <span key={h} className="card-tag">{h}</span>
                 ))}
                 {ageMatch && <span className="card-tag card-tag--match">Age match</span>}
+                {sharedInfo && (
+                  <span className="card-tag card-tag--shared">
+                    {sharedInfo.children.map(c => c.name).join(" & ")} can attend
+                  </span>
+                )}
               </div>
 
               <div className="card-footer">

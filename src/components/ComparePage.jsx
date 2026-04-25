@@ -73,7 +73,7 @@ const CRITERIA = [
   { key: "hours", label: "Hours", render: (c) => c.hours, check: () => true },
 ];
 
-export default function ComparePage({ planIds, filters, onBack, onTogglePlan, cartIds, toggleCart, children = [], cartItems = [], compareItems = [] }) {
+export default function ComparePage({ planIds, filters, onBack, onTogglePlan, cartIds, toggleCart, children = [], cartItems = [], compareItems = [], insights = {} }) {
   const [view, setView] = useState("compare");
   const [calAssignments, setCalAssignments] = useState({});
   const [exportMsg, setExportMsg] = useState(null);
@@ -148,6 +148,7 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
           compareItems={compareItems}
           filters={filters}
           onExport={handleExport}
+          insights={insights}
         />
       </div>
     </div>
@@ -157,7 +158,8 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
 /* ═══════════════════════════════════════════
    SUMMARY SIDEBAR — grouped by child
 ═══════════════════════════════════════════ */
-function SummarySidebar({ children, cartItems, compareItems, filters, onExport }) {
+function SummarySidebar({ children, cartItems, compareItems, filters, onExport, insights = {} }) {
+  const { conflicts = [], optimizations = [] } = insights;
   // Build per-child summaries
   const allItems = [...cartItems, ...compareItems];
   // Deduplicate per child
@@ -239,6 +241,24 @@ function SummarySidebar({ children, cartItems, compareItems, filters, onExport }
               <span>${(grandTotal || dedupedItems.reduce((s, i) => { const c = MOCK_CAMPS.find(x => x.id === i.campId); return s + (c ? c.price : 0); }, 0)) * (filters.weeks?.length || 1)} est.</span>
             </div>
           </div>
+
+          {/* Insights: conflicts + optimizations */}
+          {(conflicts.length > 0 || optimizations.length > 0) && (
+            <div className="cp-insights">
+              {conflicts.map((c, i) => (
+                <div key={`c${i}`} className="cp-insight cp-insight--conflict">
+                  <span className="cp-insight-icon">⚠</span>
+                  <span className="cp-insight-text">{c.message}</span>
+                </div>
+              ))}
+              {optimizations.map((o, i) => (
+                <div key={`o${i}`} className={`cp-insight cp-insight--${o.type === "over_budget" ? "warn" : "tip"}`}>
+                  <span className="cp-insight-icon">{o.type === "over_budget" ? "💸" : o.type === "under_budget" ? "✨" : o.type === "same_camp" ? "🎯" : "📍"}</span>
+                  <span className="cp-insight-text">{o.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <button className="cp-summary-cta">Proceed to booking</button>
 

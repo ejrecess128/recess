@@ -588,6 +588,7 @@ input[type=range].slider::-webkit-slider-thumb {
   border-radius: var(--radius-pill);
 }
 .card-tag--match { background: var(--teal-tint); color: var(--teal); }
+.card-tag--shared { background: #FFF8E6; color: #92400E; }
 
 /* Card footer */
 .card-footer {
@@ -879,6 +880,22 @@ input[type=range].slider::-webkit-slider-thumb {
 }
 .cp-summary-total-amount { font-size: 22px; font-weight: 700; color: var(--primary); }
 .cp-summary-total-sub { font-size: 12px; color: var(--text-3); font-weight: 400; }
+
+/* Insights panel */
+.cp-insights {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 12px; padding: 10px;
+  background: var(--neutral-10); border-radius: var(--radius-md);
+}
+.cp-insight {
+  display: flex; align-items: flex-start; gap: 6px;
+  font-size: 12px; line-height: 1.4; color: var(--text);
+}
+.cp-insight-icon { flex-shrink: 0; font-size: 13px; margin-top: 1px; }
+.cp-insight-text { flex: 1; }
+.cp-insight--conflict { color: var(--secondary); font-weight: 600; }
+.cp-insight--warn { color: var(--secondary); }
+.cp-insight--tip { color: var(--teal); }
 
 .cp-summary-cta {
   width: 100%; padding: 12px; background: var(--primary); color: white;

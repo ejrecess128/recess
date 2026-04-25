@@ -5,6 +5,7 @@ import ComparisonGrid from "./components/ComparisonGrid";
 import Header from "./components/Header";
 import ComparePage from "./components/ComparePage";
 import { MOCK_CAMPS } from "./data/camps";
+import { analyzeFamily } from "./insights";
 import "./index.css";
 
 function scoreCamp(camp, child, sharedFilters) {
@@ -102,6 +103,9 @@ export default function App() {
   const totalCompareCount = compareItems.length;
   const totalCartCount = cartItems.length;
 
+  // Phase 2: Family intelligence
+  const insights = analyzeFamily({ children, cartItems, compareItems, sharedFilters });
+
   // For filter panel — wrap setSharedFilters to also update child-specific fields
   const setFilters = (updater) => {
     if (typeof updater === "function") {
@@ -149,6 +153,7 @@ export default function App() {
           children={children}
           cartItems={cartItems}
           compareItems={compareItems}
+          insights={insights}
         />
       </div>
     );
@@ -192,6 +197,7 @@ export default function App() {
             cartIds={activeCartIds}
             toggleCart={toggleCart}
             activeChild={activeChild}
+            sharedCamps={children.length > 1 ? insights.shared : []}
           />
         </div>
       </div>
