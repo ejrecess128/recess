@@ -315,10 +315,57 @@ select.ob-input { cursor: pointer; appearance: none; background-image: url("data
 
 .ob-summary-card { background: var(--cream); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 32px; }
 .ob-summary-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin-bottom: 10px; }
-.ob-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ob-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .ob-summary-item { display: flex; flex-direction: column; gap: 1px; }
 .ob-summary-val { font-size: 16px; font-weight: 700; color: var(--text); }
 .ob-summary-key { font-size: 11px; color: var(--text-2); }
+.ob-summary-family { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.ob-summary-child { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.ob-summary-child-name { font-weight: 700; color: var(--text); }
+.ob-summary-child-age { color: var(--text-3); }
+
+/* Multi-child onboarding */
+.ob-children { display: flex; flex-direction: column; gap: 16px; }
+.ob-child-card {
+  border: 2px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px; background: var(--surface); transition: border-color 0.2s;
+}
+.ob-child-card-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.ob-child-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ob-child-label { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+.ob-child-remove {
+  background: none; border: none; font-size: 18px; color: var(--text-3);
+  cursor: pointer; line-height: 1; padding: 0 2px;
+}
+.ob-child-remove:hover { color: var(--secondary); }
+.ob-child-fields { display: flex; flex-direction: column; gap: 12px; }
+.ob-child-row { display: flex; gap: 12px; align-items: flex-start; }
+.ob-child-age { display: flex; flex-direction: column; gap: 4px; }
+.ob-child-age-num { font-size: 28px; font-weight: 700; line-height: 1; }
+
+.ob-interest-grid--compact { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ob-interest-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill); background: var(--surface);
+  font: 600 11px/1 var(--font-primary); color: var(--text-2);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.ob-interest-chip:hover { border-color: var(--primary); color: var(--primary); }
+.ob-interest-chip.selected { font-weight: 700; }
+.ob-interest-chip-icon { font-size: 14px; }
+
+.ob-add-child {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; border: 2px dashed var(--border);
+  border-radius: var(--radius-lg); background: transparent;
+  font: 600 13px/1 var(--font-primary); color: var(--text-3);
+  cursor: pointer; transition: all 0.15s;
+}
+.ob-add-child:hover { border-color: var(--primary); color: var(--primary); background: rgba(0,61,165,0.02); }
+.ob-add-child svg { flex-shrink: 0; }
 
 .ob-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .ob-btn-primary {
@@ -413,6 +460,24 @@ input[type=range].slider::-webkit-slider-thumb {
   cursor: pointer; transition: all 0.15s; width: 100%;
 }
 .reset-btn:hover { border-color: var(--text-2); color: var(--text); }
+
+/* ── Child tabs (feed) ── */
+.child-tabs {
+  display: flex; gap: 6px; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.child-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font: 600 13px/1 var(--font-primary); color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+}
+.child-tab:hover { border-color: var(--neutral-30); }
+.child-tab.active { border-color: var(--primary); background: rgba(0,61,165,0.04); color: var(--primary); }
+.child-tab-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.child-tab-name { }
+.child-tab-age { font-size: 11px; color: var(--text-3); font-weight: 500; }
 
 /* ══════════════════════════════════
    CAMP CARD GRID
@@ -792,6 +857,19 @@ input[type=range].slider::-webkit-slider-thumb {
 .cp-summary-badge--compare { background: rgba(0,61,165,0.08); color: var(--primary); }
 .cp-summary-item-price { font-size: 12px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
 
+/* Child groups in summary */
+.cp-summary-child-group {
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.cp-summary-child-group:last-of-type { border-bottom: none; margin-bottom: 8px; }
+.cp-summary-child-head {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+}
+.cp-summary-child-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cp-summary-child-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+.cp-summary-child-subtotal { font-size: 12px; font-weight: 700; color: var(--text-2); }
+
 .cp-summary-totals {
   border-top: 1px solid var(--border); padding-top: 12px; margin-bottom: 12px;
 }
@@ -981,6 +1059,8 @@ input[type=range].slider::-webkit-slider-thumb {
   .onboarding { padding: 20px 14px 48px; }
   .ob-title { font-size: 1.35rem; }
   .ob-interest-grid { grid-template-columns: 1fr; }
+  .ob-interest-grid--compact { grid-template-columns: repeat(2, 1fr); }
+  .ob-child-row { flex-direction: column; }
   .ob-row-fields { flex-direction: column; gap: 16px; }
   .ob-summary-grid { grid-template-columns: repeat(2, 1fr); }
   .ob-actions { flex-direction: column; }

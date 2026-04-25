@@ -73,7 +73,7 @@ const CRITERIA = [
   { key: "hours", label: "Hours", render: (c) => c.hours, check: () => true },
 ];
 
-export default function ComparePage({ planIds, filters, onBack, onTogglePlan, cartIds, toggleCart }) {
+export default function ComparePage({ planIds, filters, onBack, onTogglePlan, cartIds, toggleCart, children = [], cartItems = [], compareItems = [] }) {
   const [view, setView] = useState("compare");
   const [calAssignments, setCalAssignments] = useState({});
   const [exportMsg, setExportMsg] = useState(null);
@@ -142,72 +142,124 @@ export default function ComparePage({ planIds, filters, onBack, onTogglePlan, ca
         </div>
 
         {/* Persistent summary sidebar */}
-        <aside className="cp-summary">
-          <div className="cp-summary-header">
-            <span className="cp-summary-title">Summary</span>
-            <span className="cp-summary-count">{summaryCamps.length} camp{summaryCamps.length !== 1 ? "s" : ""}</span>
-          </div>
-
-          {summaryCamps.length === 0 ? (
-            <div className="cp-summary-empty">
-              <p>No camps selected yet.</p>
-              <p className="cp-summary-hint">Add camps to your cart or comparison to see your total here.</p>
-            </div>
-          ) : (
-            <>
-              <div className="cp-summary-items">
-                {summaryCamps.map(camp => {
-                  const inCart = cartIds.includes(camp.id);
-                  const inCompare = planIds.includes(camp.id);
-                  return (
-                    <div key={camp.id} className="cp-summary-item">
-                      <div className="cp-summary-item-info">
-                        <span className="cp-summary-item-name">{camp.name}</span>
-                        <span className="cp-summary-item-detail">{camp.program}</span>
-                        <div className="cp-summary-item-badges">
-                          {inCart && <span className="cp-summary-badge cp-summary-badge--cart">In cart</span>}
-                          {inCompare && <span className="cp-summary-badge cp-summary-badge--compare">Comparing</span>}
-                        </div>
-                      </div>
-                      <span className="cp-summary-item-price">${camp.price}/wk</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="cp-summary-totals">
-                <div className="cp-summary-total-row">
-                  <span>Weekly total</span>
-                  <span className="cp-summary-total-amount">${summaryTotal}</span>
-                </div>
-                <div className="cp-summary-total-row cp-summary-total-sub">
-                  <span>{filters.weeks.length || 1} week{(filters.weeks.length || 1) !== 1 ? "s" : ""} planned</span>
-                  <span>${summaryTotal * (filters.weeks.length || 1)} est.</span>
-                </div>
-              </div>
-
-              <button className="cp-summary-cta">Proceed to booking</button>
-
-              <div className="cp-summary-share">
-                <button className="cp-summary-share-btn" onClick={() => handleExport("link")}>
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M10 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  Share with co-parent
-                </button>
-                <button className="cp-summary-share-btn" onClick={() => handleExport("pdf")}>
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 14h8a1 1 0 001-1V6l-4-4H4a1 1 0 00-1 1v10a1 1 0 001 1z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Export as PDF
-                </button>
-              </div>
-            </>
-          )}
-
-          <div className="cp-summary-tip">
-            <span>💡</span>
-            <span>Both carted and compared camps are included in your total.</span>
-          </div>
-        </aside>
+        <SummarySidebar
+          children={children}
+          cartItems={cartItems}
+          compareItems={compareItems}
+          filters={filters}
+          onExport={handleExport}
+        />
       </div>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   SUMMARY SIDEBAR — grouped by child
+═══════════════════════════════════════════ */
+function SummarySidebar({ children, cartItems, compareItems, filters, onExport }) {
+  // Build per-child summaries
+  const allItems = [...cartItems, ...compareItems];
+  // Deduplicate per child
+  const itemMap = {};
+  for (const item of allItems) {
+    const key = `${item.childId}-${item.campId}`;
+    if (!itemMap[key]) {
+      itemMap[key] = { ...item, inCart: false, inCompare: false };
+    }
+    if (cartItems.some(i => i.childId === item.childId && i.campId === item.campId)) itemMap[key].inCart = true;
+    if (compareItems.some(i => i.childId === item.childId && i.campId === item.campId)) itemMap[key].inCompare = true;
+  }
+  const dedupedItems = Object.values(itemMap);
+
+  let grandTotal = 0;
+
+  return (
+    <aside className="cp-summary">
+      <div className="cp-summary-header">
+        <span className="cp-summary-title">Summary</span>
+        <span className="cp-summary-count">{dedupedItems.length} camp{dedupedItems.length !== 1 ? "s" : ""}</span>
+      </div>
+
+      {dedupedItems.length === 0 ? (
+        <div className="cp-summary-empty">
+          <p>No camps selected yet.</p>
+          <p className="cp-summary-hint">Add camps to your cart or comparison to see your total here.</p>
+        </div>
+      ) : (
+        <>
+          {children.map(child => {
+            const childItems = dedupedItems.filter(i => i.childId === child.id);
+            if (childItems.length === 0) return null;
+            const childTotal = childItems.reduce((sum, i) => {
+              const camp = MOCK_CAMPS.find(c => c.id === i.campId);
+              return sum + (camp ? camp.price : 0);
+            }, 0);
+            grandTotal += childTotal;
+
+            return (
+              <div key={child.id} className="cp-summary-child-group">
+                <div className="cp-summary-child-head">
+                  <span className="cp-summary-child-dot" style={{ background: child.color }} />
+                  <span className="cp-summary-child-name">{child.name}</span>
+                  <span className="cp-summary-child-subtotal">${childTotal}/wk</span>
+                </div>
+                <div className="cp-summary-items">
+                  {childItems.map(item => {
+                    const camp = MOCK_CAMPS.find(c => c.id === item.campId);
+                    if (!camp) return null;
+                    return (
+                      <div key={`${item.childId}-${item.campId}`} className="cp-summary-item">
+                        <div className="cp-summary-item-info">
+                          <span className="cp-summary-item-name">{camp.name}</span>
+                          <span className="cp-summary-item-detail">{camp.program}</span>
+                          <div className="cp-summary-item-badges">
+                            {item.inCart && <span className="cp-summary-badge cp-summary-badge--cart">In cart</span>}
+                            {item.inCompare && <span className="cp-summary-badge cp-summary-badge--compare">Comparing</span>}
+                          </div>
+                        </div>
+                        <span className="cp-summary-item-price">${camp.price}/wk</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Also show items not tied to a child (legacy compat) */}
+
+          <div className="cp-summary-totals">
+            <div className="cp-summary-total-row">
+              <span>Weekly total</span>
+              <span className="cp-summary-total-amount">${grandTotal || dedupedItems.reduce((s, i) => { const c = MOCK_CAMPS.find(x => x.id === i.campId); return s + (c ? c.price : 0); }, 0)}</span>
+            </div>
+            <div className="cp-summary-total-row cp-summary-total-sub">
+              <span>{filters.weeks?.length || 1} week{(filters.weeks?.length || 1) !== 1 ? "s" : ""} planned</span>
+              <span>${(grandTotal || dedupedItems.reduce((s, i) => { const c = MOCK_CAMPS.find(x => x.id === i.campId); return s + (c ? c.price : 0); }, 0)) * (filters.weeks?.length || 1)} est.</span>
+            </div>
+          </div>
+
+          <button className="cp-summary-cta">Proceed to booking</button>
+
+          <div className="cp-summary-share">
+            <button className="cp-summary-share-btn" onClick={() => onExport("link")}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M10 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              Share with co-parent
+            </button>
+            <button className="cp-summary-share-btn" onClick={() => onExport("pdf")}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 14h8a1 1 0 001-1V6l-4-4H4a1 1 0 00-1 1v10a1 1 0 001 1z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M9 2v4h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Export as PDF
+            </button>
+          </div>
+        </>
+      )}
+
+      <div className="cp-summary-tip">
+        <span>💡</span>
+        <span>Both carted and compared camps are included in your total.</span>
+      </div>
+    </aside>
   );
 }
 
